@@ -1,3 +1,6 @@
+package com.naukri.testscript;
+
+import org.testng.annotations.Test;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
@@ -9,7 +12,8 @@ public class Naukri {
 	static {
 		System.setProperty("webdriver.chrome.driver","./driver/chromedriver.exe");
 	}
-	public static void main(String[] args) throws InterruptedException {
+	@Test
+	public void Test() throws InterruptedException {
 		WebDriver driver=new ChromeDriver();
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 		driver.get("https://www.naukri.com");
@@ -23,6 +27,6 @@ public class Naukri {
 		String absolutePath = f.getAbsolutePath();
 		driver.findElement(By.id("attachCV")).sendKeys(absolutePath);
 		Thread.sleep(3000);
-//		driver.close();
+		driver.close();
 	}
 }
