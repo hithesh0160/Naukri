@@ -16,7 +16,7 @@ public class Ome {
 		WebDriver driver=new ChromeDriver();
 		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 		driver.get("https://www.selenium.dev/downloads/");
-		//driver.findElement(By.linkText("4.14.0 (October 9, 2023)"));
+		driver.findElement(By.linkText("4.14.0 (October 9, 2023)"));
 	
 }
 }
