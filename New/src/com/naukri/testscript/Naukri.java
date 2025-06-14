@@ -21,7 +21,6 @@ public class Naukri {
 //		driver.manage().window().maximize();
 		driver.get("https://www.Naukri.com");
 
-//		WebDriverWait wait = new WebDriverWait(driver, Duration.of(2l, 50));
 		
 		driver.findElement(By.linkText("Login")).click();
 		Thread.sleep(1000);
