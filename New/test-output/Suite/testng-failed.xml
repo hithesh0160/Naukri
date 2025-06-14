@@ -5,7 +5,7 @@
     <classes>
       <class name="com.naukri.testscript.Naukri">
         <methods>
-          <include name="Test"/>
+          <include name="test"/>
         </methods>
       </class> <!-- com.naukri.testscript.Naukri -->
     </classes>
