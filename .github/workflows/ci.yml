@@ -17,3 +17,8 @@ jobs:
 
       - name: Build with Maven
         run: mvn -B clean install
+        working-directory: ./New
+
+      - name: Run a script
+        run: echo "This workflow was manually triggered!"
+        working-directory: ./New
