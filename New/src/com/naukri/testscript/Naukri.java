@@ -6,9 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -22,14 +22,14 @@ public class Naukri {
 	@Test
 	public void test() throws IOException {
 
-		ChromeOptions options = new ChromeOptions();
+		EdgeOptions options = new EdgeOptions();
 		// options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
 
 		// Generate a unique temp directory for user data
 		Path userDataDir = Files.createTempDirectory(java.util.UUID.randomUUID().toString());
 		options.addArguments("--user-data-dir=" + userDataDir.toString());
 
-		WebDriver driver = new ChromeDriver(options);
+		WebDriver driver = new EdgeDriver(options);
 
 		driver.get("https://www.naukri.com");
 
