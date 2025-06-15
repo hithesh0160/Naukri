@@ -23,7 +23,7 @@ public class Naukri {
 	public void test() throws IOException {
 
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
+		// options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
 
 		// Generate a unique temp directory for user data
 		Path userDataDir = Files.createTempDirectory(java.util.UUID.randomUUID().toString());
