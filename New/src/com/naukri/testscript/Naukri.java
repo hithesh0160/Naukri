@@ -1,14 +1,14 @@
 package com.naukri.testscript;
 
 import java.io.File;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
+
 import org.openqa.selenium.By;
 
 public class Naukri {
@@ -16,8 +16,14 @@ public class Naukri {
 	public static WebDriver driver;
 
 	@Test
-	public void test() throws InterruptedException {
-		driver = new ChromeDriver(); // Selenium Manager handles driver setup
+	public void test() throws InterruptedException, IOException {
+
+		ChromeOptions options = new ChromeOptions();
+		List<String> args = Arrays.asList("--headless", "--no-sandbox", "--disable-dev-shm-usage");
+		options.addArguments(args);
+
+		driver = new ChromeDriver(options);
+
 //		driver.manage().window().maximize();
 		driver.get("https://www.Naukri.com");
 
