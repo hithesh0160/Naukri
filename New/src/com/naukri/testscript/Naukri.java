@@ -2,47 +2,46 @@ package com.naukri.testscript;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.time.Duration;
+import java.util.NoSuchElementException;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.Test;
-
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import org.testng.annotations.Test;
 
 public class Naukri {
 
 	public static WebDriver driver;
 
 	@Test
-	public void test() throws InterruptedException, IOException {
+	public void test() throws IOException {
 
 		ChromeOptions options = new ChromeOptions();
-		List<String> args = Arrays.asList("--headless", "--no-sandbox", "--disable-dev-shm-usage");
-		options.addArguments(args);
+		options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
 
 		driver = new ChromeDriver(options);
 
-//		driver.manage().window().maximize();
-		driver.get("https://www.Naukri.com");
+		driver.get("https://www.naukri.com");
 
-		
-		driver.findElement(By.linkText("Login")).click();
-		Thread.sleep(1000);
-		driver.findElement(By.xpath("//label[text()='Email ID / Username']/../input"))
-			  .sendKeys("hitesh_p16@yahoo.com");
-		driver.findElement(By.xpath("//input[@type='password']"))
-			  .sendKeys("abc1234@");
-		driver.findElement(By.xpath("//button[text()='Login']")).click();
-//		wait.until(ExpectedConditions.titleIs("Home | Mynaukri"));
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
-		driver.get("https://www.naukri.com/mnjuser/profile?id=&altresid");
-		driver.findElement(By.xpath("//div[text()='UPDATE PROFILE']")).click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Login"))).click();
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input")))
+			.sendKeys("hitesh_p16@yahoo.com");
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@type='password']")))
+			.sendKeys("Flappybird@123");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Login']"))).click();
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5)); // Wait for 5 seconds to ensure login is processed
+		driver.get("https://www.naukri.com/mnjuser/profile");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@class='dummyUpload typ-14Bold']"))).click();
 		File f = new File("./data/Mr.Hithesh_Experienced_Tester_Resume.pdf");
-		driver.findElement(By.id("attachCV")).sendKeys(f.getAbsolutePath());
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("attachCV"))).sendKeys(f.getAbsolutePath());
 
 		driver.quit();
 	}
-
 }
