@@ -4,11 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.util.NoSuchElementException;
-
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -30,7 +27,7 @@ public class Naukri {
 		Path userDataDir = Files.createTempDirectory("chrome-user-data");
 		options.addArguments("--user-data-dir=" + userDataDir.toString());
 
-		driver = new ChromeDriver(options);
+		WebDriver driver = new ChromeDriver(options);
 
 		driver.get("https://www.naukri.com");
 
