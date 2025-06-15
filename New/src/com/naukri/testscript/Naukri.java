@@ -2,6 +2,8 @@ package com.naukri.testscript;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.NoSuchElementException;
 
@@ -24,6 +26,10 @@ public class Naukri {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
 
+		// Generate a unique temp directory for user data
+		Path userDataDir = Files.createTempDirectory("chrome-user-data");
+		options.addArguments("--user-data-dir=" + userDataDir.toString());
+
 		driver = new ChromeDriver(options);
 
 		driver.get("https://www.naukri.com");
@@ -36,7 +42,8 @@ public class Naukri {
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@type='password']")))
 			.sendKeys("Flappybird@123");
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Login']"))).click();
-		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5)); // Wait for 5 seconds to ensure login is processed
+		// Explicit wait to ensure login is processed and profile link is clickable
+		wait.until(ExpectedConditions.titleContains("Home | Mynaukri"));
 		driver.get("https://www.naukri.com/mnjuser/profile");
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@class='dummyUpload typ-14Bold']"))).click();
 		File f = new File("./data/Mr.Hithesh_Experienced_Tester_Resume.pdf");
