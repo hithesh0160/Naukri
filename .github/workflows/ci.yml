@@ -15,6 +15,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Kill Chrome processes
+        run: pkill chrome || true
+
       - name: Build with Maven
         run: mvn -B clean install
         working-directory: ./New
