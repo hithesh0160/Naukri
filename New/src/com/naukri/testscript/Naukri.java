@@ -24,8 +24,8 @@ public class Naukri {
 		options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
 
 		// Generate a unique temp directory for user data
-		Path userDataDir = Files.createTempDirectory("chrome-user-data");
-		options.addArguments("--user-data-dir=" + userDataDir.toString());
+		// Path userDataDir = Files.createTempDirectory("chrome-user-data");
+		// options.addArguments("--user-data-dir=" + userDataDir.toString());
 
 		WebDriver driver = new ChromeDriver(options);
 
