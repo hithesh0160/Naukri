@@ -53,8 +53,9 @@ public class Naukri {
 		File f = new File("./data/Mr.Hithesh_Experienced_Tester_Resume.pdf");
 		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("attachCV"))).sendKeys(f.getAbsolutePath());
 
+		// Save screenshot to the workspace root or a known location
 		File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-		Files.copy(screenshot.toPath(), Paths.get("screenshot.png"));
+		Files.copy(screenshot.toPath(), Paths.get("New/screenshot.png")); // This saves to ./New/screenshot.png
 
 		driver.quit();
 	}
