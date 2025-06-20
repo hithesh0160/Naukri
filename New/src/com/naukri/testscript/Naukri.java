@@ -25,7 +25,7 @@ public class Naukri {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--no-sandbox");
 		options.addArguments("--disable-dev-shm-usage");
-		options.addArguments("--headless=new");
+		options.addArguments("--headless");
 
 		// Generate a unique temp directory for user data
 		Path userDataDir = Files.createTempDirectory(java.util.UUID.randomUUID().toString());
