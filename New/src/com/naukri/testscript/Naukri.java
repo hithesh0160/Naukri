@@ -44,20 +44,35 @@ public class Naukri {
 		try {
 			driver = new ChromeDriver(options);
 
+			System.out.println("Navigating to Naukri.com...");
 			driver.get("https://www.naukri.com");
 
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(300));
+			System.out.println("Waiting for Login link...");
+			WebDriverWait wait = new WebDriverWait(driver, 60);
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Login"))).click();
+
+			System.out.println("Entering email...");
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input")))
 				.sendKeys("hitesh_p16@yahoo.com");
+
+			System.out.println("Entering password...");
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@type='password']")))
 				.sendKeys("Flappybird@123");
+
+			System.out.println("Clicking Login button...");
 			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Login']"))).click();
-			// Explicit wait to ensure login is processed and profile link is clickable
+
+			System.out.println("Waiting for Home page to load...");
 			wait.until(ExpectedConditions.titleContains("Home | Mynaukri"));
+
+			System.out.println("Navigating to profile page...");
 			driver.get("https://www.naukri.com/mnjuser/profile");
+
+			System.out.println("Clicking upload resume button...");
 			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@class='dummyUpload typ-14Bold']"))).click();
+
 			File f = new File("./data/Mr.Hithesh_Experienced_Tester_Resume.pdf");
+			System.out.println("Uploading resume: " + f.getAbsolutePath());
 			wait.until(ExpectedConditions.presenceOfElementLocated(By.id("attachCV"))).sendKeys(f.getAbsolutePath());
 
 			Path screenshotPath = Paths.get("headless-debug.png");
