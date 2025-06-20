@@ -26,6 +26,9 @@ jobs:
       - name: Kill Chrome processes
         run: pkill chrome || true
 
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libnss3 libatk-bridge2.0-0 libgtk-3-0
+
       - name: Build with Maven
         run: mvn -B clean install
         working-directory: ./New
@@ -54,9 +57,6 @@ jobs:
           distribution: 'temurin'
           server-id: github
           settings-path: ${{ github.workspace }}
-
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libnss3 libatk-bridge2.0-0 libgtk-3-0
 
       - name: Build and Publish with Maven
         run: mvn -B deploy --file pom.xml
