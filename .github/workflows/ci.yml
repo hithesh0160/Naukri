@@ -68,3 +68,25 @@ jobs:
         run: mvn -B deploy --file pom.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  proxy-test:
+    runs-on: ubuntu-latest
+    env:
+      http_proxy: http://155.50.213.149:3128
+      https_proxy: http://155.50.213.149:3128
+      no_proxy: localhost,127.0.0.1
+    steps:
+      - name: Test proxy
+        run: curl -
+
+  test-proxy:
+    runs-on: ubuntu-latest
+    env:
+      http_proxy: http://139.59.1.14:80
+      https_proxy: http://139.59.1.14:80
+      no_proxy: localhost,127.0.0.1
+    steps:
+      - name: Check proxy with curl
+        run: |
+          echo "Testing proxy..."
+          curl -I https://www.google.com || echo "Proxy test failed"

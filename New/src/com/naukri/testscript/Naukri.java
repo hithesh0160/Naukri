@@ -5,16 +5,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+
 import java.time.Duration;
 
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 
 import org.testng.annotations.Test;
 
@@ -25,10 +27,18 @@ public class Naukri {
 	@Test
 	public void test() throws IOException {
 
+		// String proxyAddress = "139.59.1.14:80";
+
+		// Proxy proxy = new Proxy();
+		// proxy.setHttpProxy(proxyAddress)
+		//      .setSslProxy(proxyAddress);
+
 		ChromeOptions options = new ChromeOptions();
+		// options.setProxy(proxy);
 		options.addArguments("--window-size=1920,1080");
-		options.addArguments("--headless");
-		options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
+		options.addArguments("--no-sandbox");
+		// options.addArguments("--headless=new");
+		options.addArguments("--disable-dev-shm-usage");
 		options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 
 		// Generate a unique temp directory for user data
@@ -55,17 +65,24 @@ public class Naukri {
 			File f = new File("./data/Mr.Hithesh_Experienced_Tester_Resume.pdf");
 			wait.until(ExpectedConditions.presenceOfElementLocated(By.id("attachCV"))).sendKeys(f.getAbsolutePath());
 
-			// Save screenshot to the workspace root or a known location
-			File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 			Path screenshotPath = Paths.get("headless-debug.png");
+			// Delete previous screenshot if it exists
+			Files.deleteIfExists(screenshotPath);
+
+			// Take new screenshot
+			File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 			Files.copy(screenshot.toPath(), screenshotPath);
 			System.out.println("Screenshot saved at: " + screenshotPath.toAbsolutePath());
 
 		} catch (Exception e) {
 			try {
 				if (driver != null) {
-					File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 					Path screenshotPath = Paths.get("headless-debug.png");
+					// Delete previous screenshot if it exists
+					Files.deleteIfExists(screenshotPath);
+
+					// Take new screenshot
+					File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 					Files.copy(screenshot.toPath(), screenshotPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 					System.out.println("Screenshot saved at: " + screenshotPath.toAbsolutePath());
 				}
