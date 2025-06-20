@@ -12,16 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      http_proxy: http://139.59.1.14:80
-      https_proxy: http://139.59.1.14:80
-      no_proxy: localhost,127.0.0.1
     steps:
-      - name: Check proxy with curl
-        run: |
-          echo "Testing proxy..."
-          curl -I https://www.naukri.com || echo "Proxy test failed"
-
       - uses: actions/checkout@v4
 
       - name: Set up JDK 17
