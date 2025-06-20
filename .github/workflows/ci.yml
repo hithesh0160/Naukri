@@ -22,7 +22,6 @@ jobs:
           echo "Testing proxy..."
           curl -I https://www.google.com || echo "Proxy test failed"
 
-    steps:
       - uses: actions/checkout@v4
 
       - name: Set up JDK 17
