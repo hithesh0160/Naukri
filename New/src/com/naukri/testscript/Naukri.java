@@ -17,6 +17,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.PageLoadStrategy;
 
 import org.testng.annotations.Test;
 
@@ -33,6 +34,7 @@ public class Naukri {
 		options.addArguments("--headless=new");
 		options.addArguments("--disable-dev-shm-usage");
 		options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+		options.setPageLoadStrategy(PageLoadStrategy.EAGER); // or NONE
 
 		// Generate a unique temp directory for user data
 		Path userDataDir = Files.createTempDirectory(java.util.UUID.randomUUID().toString());
@@ -44,7 +46,7 @@ public class Naukri {
 
 			driver.get("https://www.naukri.com");
 
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Login"))).click();
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input")))
 				.sendKeys("hitesh_p16@yahoo.com");
