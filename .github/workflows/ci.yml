@@ -40,6 +40,7 @@ jobs:
         uses: advanced-security/maven-dependency-submission-action@v4
 
       - name: Upload screenshot
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: selenium-screenshot
