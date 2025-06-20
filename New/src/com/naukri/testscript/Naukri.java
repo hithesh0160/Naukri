@@ -27,14 +27,7 @@ public class Naukri {
 	@Test
 	public void test() throws IOException {
 
-		// String proxyAddress = "139.59.1.14:80";
-
-		// Proxy proxy = new Proxy();
-		// proxy.setHttpProxy(proxyAddress)
-		//      .setSslProxy(proxyAddress);
-
 		ChromeOptions options = new ChromeOptions();
-		// options.setProxy(proxy);
 		options.addArguments("--window-size=1920,1080");
 		options.addArguments("--no-sandbox");
 		options.addArguments("--headless=new");

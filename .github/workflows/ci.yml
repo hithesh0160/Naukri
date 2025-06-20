@@ -20,7 +20,7 @@ jobs:
       - name: Check proxy with curl
         run: |
           echo "Testing proxy..."
-          curl -I https://www.google.com || echo "Proxy test failed"
+          curl -I https://www.naukri.com || echo "Proxy test failed"
 
       - uses: actions/checkout@v4
 
