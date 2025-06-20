@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -12,6 +13,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 
 import org.testng.annotations.Test;
 
@@ -26,6 +29,7 @@ public class Naukri {
 		options.addArguments("--no-sandbox");
 		options.addArguments("--disable-dev-shm-usage");
 		options.addArguments("--headless");
+		options.addArguments("--window-size=1920,1080");
 
 		// Generate a unique temp directory for user data
 		Path userDataDir = Files.createTempDirectory(java.util.UUID.randomUUID().toString());
@@ -35,9 +39,8 @@ public class Naukri {
 
 		driver.get("https://www.naukri.com");
 
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-
-		wait.until(ExpectedConditions.elementToBeClickable(By.linkText("Login"))).click();
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Login"))).click();
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input")))
 			.sendKeys("hitesh_p16@yahoo.com");
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@type='password']")))
@@ -49,6 +52,9 @@ public class Naukri {
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@class='dummyUpload typ-14Bold']"))).click();
 		File f = new File("./data/Mr.Hithesh_Experienced_Tester_Resume.pdf");
 		wait.until(ExpectedConditions.presenceOfElementLocated(By.id("attachCV"))).sendKeys(f.getAbsolutePath());
+
+		File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+		Files.copy(screenshot.toPath(), Paths.get("screenshot.png"));
 
 		driver.quit();
 	}
