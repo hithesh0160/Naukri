@@ -31,26 +31,3 @@ jobs:
 
       - name: Update dependency graph
         uses: advanced-security/maven-dependency-submission-action@v4
-
-  # publish:
-  #   if: github.event_name == 'release'
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     packages: write
-# 
-    # steps:
-    #   - uses: actions/checkout@v4
-
-    #   - name: Set up JDK 11
-    #     uses: actions/setup-java@v4
-    #     with:
-    #       java-version: '11'
-    #       distribution: 'temurin'
-    #       server-id: github
-    #       settings-path: ${{ github.workspace }}
-
-    #   - name: Build and Publish with Maven
-    #     run: mvn -B deploy --file pom.xml
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -48,7 +48,7 @@ public class Naukri {
 			driver.get("https://www.naukri.com");
 
 			System.out.println("Waiting for Login link...");
-			WebDriverWait wait = new WebDriverWait(driver, 60);
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Login"))).click();
 
 			System.out.println("Entering email...");
