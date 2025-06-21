@@ -1,18 +1,15 @@
 package com.naukri.testscript;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 
 import java.time.Duration;
 
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -23,6 +20,8 @@ import org.openqa.selenium.PageLoadStrategy;
 
 import org.testng.annotations.Test;
 
+import com.naukri.util.ConfigUtil; 
+
 public class Naukri {
 
 	public static WebDriver driver;
@@ -30,21 +29,17 @@ public class Naukri {
 	@Test
 	public void test() throws IOException {
 
-		Properties props = new Properties();
-		props.load(new FileInputStream("C:\\Users\\hites\\git\\Naukri\\New\\src\\com\\n" + //
-						"aukri\\config\\config.properties"));
-		String username = props.getProperty("username");
-		String password = props.getProperty("password");
+		String username = ConfigUtil.getConfig("username");
+		String password = ConfigUtil.getConfig("password");
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--window-size=1920,1080");
 		options.addArguments("--no-sandbox");
-		options.addArguments("--headless=new");
+		options.addArguments("--headless");
 		options.addArguments("--disable-dev-shm-usage");
 		options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-		options.setPageLoadStrategy(PageLoadStrategy.NONE); // or NONE
+		options.setPageLoadStrategy(PageLoadStrategy.NONE);
 
-		// Generate a unique temp directory for user data
 		Path userDataDir = Files.createTempDirectory(java.util.UUID.randomUUID().toString());
 		options.addArguments("--user-data-dir=" + userDataDir.toString());
 
@@ -60,8 +55,7 @@ public class Naukri {
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Login"))).click();
 
 			System.out.println("Entering email...");
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input")))
-				.sendKeys(username);
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input")));
 
 			System.out.println("Entering password...");
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@type='password']")))
@@ -84,10 +78,8 @@ public class Naukri {
 			wait.until(ExpectedConditions.presenceOfElementLocated(By.id("attachCV"))).sendKeys(f.getAbsolutePath());
 
 			Path screenshotPath = Paths.get("headless-debug.png");
-			// Delete previous screenshot if it exists
 			Files.deleteIfExists(screenshotPath);
 
-			// Take new screenshot
 			File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 			Files.copy(screenshot.toPath(), screenshotPath);
 			System.out.println("Screenshot saved at: " + screenshotPath.toAbsolutePath());
@@ -96,10 +88,8 @@ public class Naukri {
 			try {
 				if (driver != null) {
 					Path screenshotPath = Paths.get("headless-debug.png");
-					// Delete previous screenshot if it exists
 					Files.deleteIfExists(screenshotPath);
 
-					// Take new screenshot
 					File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 					Files.copy(screenshot.toPath(), screenshotPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 					System.out.println("Screenshot saved at: " + screenshotPath.toAbsolutePath());
@@ -108,7 +98,7 @@ public class Naukri {
 				System.out.println("Failed to capture screenshot: " + ex.getMessage());
 			}
 			e.printStackTrace();
-			throw e; // rethrow to let the test fail
+			throw e;
 		} finally {
 			if (driver != null) {
 				driver.quit();
