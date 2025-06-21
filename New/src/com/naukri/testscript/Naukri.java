@@ -31,7 +31,8 @@ public class Naukri {
 	public void test() throws IOException {
 
 		Properties props = new Properties();
-		props.load(new FileInputStream("config.properties"));
+		props.load(new FileInputStream("C:\\Users\\hites\\git\\Naukri\\New\\src\\com\\n" + //
+						"aukri\\config\\config.properties"));
 		String username = props.getProperty("username");
 		String password = props.getProperty("password");
 
