@@ -35,7 +35,7 @@ public class Naukri {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--window-size=1920,1080");
 		options.addArguments("--no-sandbox");
-		// options.addArguments("--headless");
+		options.addArguments("--headless");
 		options.addArguments("--disable-dev-shm-usage");
 		options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
 		options.setPageLoadStrategy(PageLoadStrategy.NONE);
