@@ -1,10 +1,12 @@
 package com.naukri.testscript;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 
@@ -27,6 +29,11 @@ public class Naukri {
 
 	@Test
 	public void test() throws IOException {
+
+		Properties props = new Properties();
+		props.load(new FileInputStream("config.properties"));
+		String username = props.getProperty("username");
+		String password = props.getProperty("password");
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--window-size=1920,1080");
@@ -53,11 +60,11 @@ public class Naukri {
 
 			System.out.println("Entering email...");
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input")))
-				.sendKeys("hitesh_p16@yahoo.com");
+				.sendKeys(username);
 
 			System.out.println("Entering password...");
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@type='password']")))
-				.sendKeys("Flappybird@123");
+				.sendKeys(password);
 
 			System.out.println("Clicking Login button...");
 			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Login']"))).click();
