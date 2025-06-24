@@ -29,8 +29,8 @@ public class Naukri {
 	@Test
 	public void test() throws IOException {
 
-		String username = ConfigUtil.getConfig("username");
-		String password = ConfigUtil.getConfig("password");
+		String username = ConfigUtil.getConfig("NAUKRI_USERNAME", "username");
+		String password = ConfigUtil.getConfig("NAUKRI_PASSWORD", "password");
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--window-size=1920,1080");
