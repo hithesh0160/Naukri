@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-
+import java.nio.file.StandardCopyOption;
+import java.util.Properties;
 import java.time.Duration;
 
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -25,6 +26,31 @@ import com.naukri.util.ConfigUtil;
 public class Naukri {
 
 	public static WebDriver driver;
+
+	private static final String LAST_RESUME_FILE = "C:\\Users\\hites\\git\\Naukri\\New\\src\\com\\naukri\\config\\last_resume_uploaded.properties";
+	private static final String[] RESUME_FILES = {
+		"./data/Mr.Hithesh_Experienced_Tester_Resume.pdf",
+		"./data/Mr.Hithesh_Experienced_Tester_Resume1.pdf"
+	};
+
+	private String getNextResumeFile() throws IOException {
+		Properties props = new Properties();
+		Path lastResumePath = Paths.get(LAST_RESUME_FILE);
+		String lastResume = null;
+		if (Files.exists(lastResumePath)) {
+			props.load(Files.newInputStream(lastResumePath));
+			lastResume = props.getProperty("last");
+		}
+		// Pick the resume that was NOT uploaded last time
+		String nextResume = RESUME_FILES[0];
+		if (lastResume != null && lastResume.equals(RESUME_FILES[0])) {
+			nextResume = RESUME_FILES[1];
+		}
+		// Save the resume being uploaded this time
+		props.setProperty("last", nextResume);
+		props.store(Files.newOutputStream(lastResumePath, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING), null);
+		return nextResume;
+	}
 
 	@Test
 	public void test() throws IOException {
@@ -73,7 +99,8 @@ public class Naukri {
 			System.out.println("Clicking upload resume button...");
 			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@class='dummyUpload typ-14Bold']"))).click();
 
-			File f = new File("./data/Mr.Hithesh_Experienced_Tester_Resume.pdf");
+			String resumePath = getNextResumeFile();
+			File f = new File(resumePath);
 			System.out.println("Uploading resume: " + f.getAbsolutePath());
 			wait.until(ExpectedConditions.presenceOfElementLocated(By.id("attachCV"))).sendKeys(f.getAbsolutePath());
 
