@@ -55,8 +55,8 @@ public class Naukri {
 	@Test
 	public void test() throws IOException {
 
-		String username = ConfigUtil.getConfig("NAUKRI_USERNAME", "username");
-		String password = ConfigUtil.getConfig("NAUKRI_PASSWORD", "password");
+		// String username = ConfigUtil.getConfig("NAUKRI_USERNAME", "username");
+		// String password = ConfigUtil.getConfig("NAUKRI_PASSWORD", "password");
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--window-size=1920,1080");
@@ -83,11 +83,11 @@ public class Naukri {
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Login"))).click();
 
 			System.out.println("Entering email...");
-			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input"))).sendKeys(username);;
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Email ID / Username']/../input"))).sendKeys("username");;
 
 			System.out.println("Entering password...");
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@type='password']")))
-				.sendKeys(password);
+				.sendKeys("password");
 
 			System.out.println("Clicking Login button...");
 			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Login']"))).click();
