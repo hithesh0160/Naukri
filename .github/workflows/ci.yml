@@ -28,7 +28,7 @@ jobs:
           echo "password=${{ secrets.password }}" >> $GITHUB_ENV
 
       - name: Build and test
-        run: mvn -B clean install
+        run: mvn -B clean test
         working-directory: ./New
 
       - name: Run a script

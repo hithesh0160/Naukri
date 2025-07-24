@@ -74,10 +74,12 @@ public class Naukri {
 			driver = new ChromeDriver(options);
 
 			System.out.println("Navigating to Naukri.com...");
-			driver.get("https://www.naukri.com");
+			driver.get("https://www.amazon.in/s?k=smartphones&i=electronics&rh=n%3A1805560031%2Cp_n_pct-off-with-tax%3A2665399031%2Cp_n_feature_eighteen_browse-bin%3A27355812031&s=price-asc-rank&dc&ds=v1%3A1LnjVlgfcmLpzkRTyvVg9drUER1%2BtdJTV1L4PXz3uw4");
+			// driver.get("https://www.naukri.com");
 
 			System.out.println("Waiting for Login link...");
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			wait.until(ExpectedConditions.titleContains("Home | Mynaukri"));
 			wait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Login"))).click();
 
 			System.out.println("Entering email...");
