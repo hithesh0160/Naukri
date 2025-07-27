@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 
 import com.naukri.util.ConfigUtil; 
 
+@Test
 public class Naukri {
 
 	public static WebDriver driver;
@@ -52,7 +53,6 @@ public class Naukri {
 		return nextResume;
 	}
 
-	@Test
 	public void test() throws IOException {
 
 		String username = ConfigUtil.getConfig("NAUKRI_USERNAME", "username");

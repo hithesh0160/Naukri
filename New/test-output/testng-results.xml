@@ -2,26 +2,23 @@
 <testng-results ignored="0" total="1" passed="0" failed="1" skipped="0">
   <reporter-output>
   </reporter-output>
-  <suite started-at="2025-06-14T17:22:59 IST" name="Default suite" finished-at="2025-06-14T17:22:59 IST" duration-ms="335">
+  <suite started-at="2025-07-27T12:22:58 IST" name="Suite" finished-at="2025-07-27T12:22:58 IST" duration-ms="98">
     <groups>
     </groups>
-    <test started-at="2025-06-14T17:22:59 IST" name="Default test" finished-at="2025-06-14T17:22:59 IST" duration-ms="335">
+    <test started-at="2025-07-27T12:22:58 IST" name="Test" finished-at="2025-07-27T12:22:58 IST" duration-ms="98">
       <class name="com.naukri.testscript.Naukri">
-        <test-method signature="test()[pri:0, instance:com.naukri.testscript.Naukri@3fc2959f]" started-at="2025-06-14T17:22:59 IST" name="test" finished-at="2025-06-14T17:22:59 IST" duration-ms="145" status="FAIL">
-          <exception class="java.lang.IllegalStateException">
+        <test-method signature="test()[pri:0, instance:com.naukri.testscript.Naukri@443118b0]" started-at="2025-07-27T12:22:58 IST" name="test" finished-at="2025-07-27T12:22:58 IST" duration-ms="13" status="FAIL">
+          <exception class="java.lang.Error">
             <message>
-              <![CDATA[The path to the driver executable must be set by the webdriver.chrome.driver system property; for more information, see https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver. The latest version can be downloaded from http://chromedriver.storage.googleapis.com/index.html]]>
+              <![CDATA[Unresolved compilation problem: 
+The constructor WebDriverWait(WebDriver, Duration) is undefined
+]]>
             </message>
             <full-stacktrace>
-              <![CDATA[java.lang.IllegalStateException: The path to the driver executable must be set by the webdriver.chrome.driver system property; for more information, see https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver. The latest version can be downloaded from http://chromedriver.storage.googleapis.com/index.html
-at com.google.common.base.Preconditions.checkState(Preconditions.java:847)
-at org.openqa.selenium.remote.service.DriverService.findExecutable(DriverService.java:134)
-at org.openqa.selenium.chrome.ChromeDriverService.access$000(ChromeDriverService.java:35)
-at org.openqa.selenium.chrome.ChromeDriverService$Builder.findDefaultExecutable(ChromeDriverService.java:159)
-at org.openqa.selenium.remote.service.DriverService$Builder.build(DriverService.java:355)
-at org.openqa.selenium.chrome.ChromeDriverService.createDefaultService(ChromeDriverService.java:94)
-at org.openqa.selenium.chrome.ChromeDriver.<init>(ChromeDriver.java:123)
-at com.naukri.testscript.Naukri.test(Naukri.java:17)
+              <![CDATA[java.lang.Error: Unresolved compilation problem: 
+The constructor WebDriverWait(WebDriver, Duration) is undefined
+
+at com.naukri.testscript.Naukri.test(Naukri.java:80)
 at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
 at java.base/java.lang.reflect.Method.invoke(Method.java:580)
 at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:141)
@@ -50,11 +47,11 @@ at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java:293)
 at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:91)
 ]]>
             </full-stacktrace>
-          </exception> <!-- java.lang.IllegalStateException -->
+          </exception> <!-- java.lang.Error -->
           <reporter-output>
           </reporter-output>
         </test-method> <!-- test -->
       </class> <!-- com.naukri.testscript.Naukri -->
-    </test> <!-- Default test -->
-  </suite> <!-- Default suite -->
+    </test> <!-- Test -->
+  </suite> <!-- Suite -->
 </testng-results>

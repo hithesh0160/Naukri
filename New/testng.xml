@@ -3,7 +3,7 @@
 <suite name="Suite">
   <test thread-count="5" name="Test">
     <classes>
-      <class name="com.naukri.testscript.TabletsUITest"/>
+      <class name="com.naukri.testscript.Naukri"/>
     </classes>
   </test> <!-- Test -->
 </suite> <!-- Suite -->

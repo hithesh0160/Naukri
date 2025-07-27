@@ -1,4 +1,4 @@
-package com.amazon.utils;
+package com.naukri.utils;
 
 import java.net.http.*;
 import java.net.CookieManager;
