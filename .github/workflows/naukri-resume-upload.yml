@@ -32,15 +32,15 @@ jobs:
         run: |
           which google-chrome-stable
           google-chrome-stable --version
+          # Create symlink for Selenium Manager
+          sudo ln -sf /usr/bin/google-chrome-stable /usr/bin/google-chrome
       
       - name: Run Naukri Resume Upload Test
         env:
           NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
           NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
-        run: |
-          # Suppress Selenium Manager verbose output
-          export SE_AVOID_STATS=true
-          mvn clean test 2>&1 | grep -v "^\[0x" || true
+          SE_AVOID_STATS: true
+        run: mvn clean test
       
       - name: Upload Screenshots
         if: always()
