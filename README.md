@@ -180,8 +180,7 @@ Edit `src/com/naukri/util/ResumeManager.java` and add files to `RESUME_FILES` ar
 - **Language:** Java 17
 - **Build Tool:** Maven 3.6+
 - **Test Framework:** TestNG 7.10.2
-- **Automation:** Selenium 4.27.0
-- **Driver Management:** WebDriverManager 5.9.2
+- **Automation:** Selenium 4.27.0 (with built-in Selenium Manager)
 - **Logging:** SLF4J 2.0.16 + Logback 1.5.12
 - **CI/CD:** GitHub Actions
 

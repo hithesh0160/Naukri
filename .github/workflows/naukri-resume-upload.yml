@@ -37,7 +37,10 @@ jobs:
         env:
           NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
           NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
-        run: mvn clean test
+        run: |
+          # Suppress Selenium Manager verbose output
+          export SE_AVOID_STATS=true
+          mvn clean test 2>&1 | grep -v "^\[0x" || true
       
       - name: Upload Screenshots
         if: always()
