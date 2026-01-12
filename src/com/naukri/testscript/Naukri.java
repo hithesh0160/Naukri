@@ -57,6 +57,9 @@ public class Naukri {
             ResumeManager resumeManager = new ResumeManager();
             File resumeFile = resumeManager.getNextResumeFile();
             
+            // Capture screenshot before upload attempt
+            ScreenshotUtil.captureScreenshot(driver, "before-upload.png");
+            
             // Upload resume
             profilePage.uploadResumeComplete(resumeFile);
             

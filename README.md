@@ -12,6 +12,8 @@ Automated Selenium-based framework for uploading resumes to Naukri.com daily. Ru
 - ✅ Comprehensive logging
 - ✅ Page Object Model architecture
 - ✅ Environment-based configuration
+- ✅ Advanced anti-bot detection measures
+- ✅ Human-like interaction patterns
 
 ## Quick Start
 
@@ -128,6 +130,35 @@ Uses GitHub Secrets as environment variables. No code changes needed.
 
 Detection is automatic based on `CI` environment variable.
 
+### Anti-Bot Detection Measures
+
+To avoid being blocked by Naukri.com's bot detection systems, the framework implements multiple anti-detection strategies:
+
+#### 1. Browser Fingerprint Masking
+- **Disabled automation flags:** `--disable-blink-features=AutomationControlled`
+- **Removed automation switches:** Excludes `enable-automation` switch
+- **Hidden webdriver property:** Uses CDP commands to set `navigator.webdriver` to `undefined`
+- **Realistic user agent:** Sets Linux Chrome 143 user agent string
+
+#### 2. Human-Like Behavior
+- **Slow typing:** Types credentials character-by-character with 100-200ms random delays
+- **Random delays:** Adds natural pauses between actions (500ms before login click)
+- **Realistic window size:** Uses standard 1920x1080 resolution
+- **Temporary user data:** Creates fresh Chrome profile for each run
+
+#### 3. Intelligent Element Detection
+- **Multiple locator strategies:** Falls back to alternative CSS selectors if primary fails
+- **JavaScript click fallback:** Uses JS click if regular click is blocked
+- **Direct file upload:** Attempts direct file input before clicking buttons
+- **Extended timeouts:** 60-second waits for critical elements
+
+#### 4. Debugging & Monitoring
+- **Pre-upload screenshots:** Captures page state before upload attempts
+- **Detailed logging:** Logs URLs, titles, and element states at each step
+- **Error screenshots:** Captures failure states for troubleshooting
+
+These measures make the automation appear more like a real user, reducing the likelihood of being flagged as a bot.
+
 ### Resume Rotation
 
 Alternates between `resume1.pdf` and `resume2.pdf` on each run. State tracked in `last_resume_uploaded.properties`.
@@ -158,6 +189,8 @@ Check logs in `logs/naukri-automation.log` and screenshots (`.png` files).
 - Verify secrets are configured correctly
 - Check workflow logs in Actions tab
 - Download artifacts (screenshots, logs) for debugging
+- If blocked by bot detection, check `before-upload.png` to see page state
+- Bot detection errors typically show "Access Denied" or missing elements
 
 ## Customization
 
@@ -194,10 +227,13 @@ Edit `src/com/naukri/util/ResumeManager.java` and add files to `RESUME_FILES` ar
 ## Output Files
 
 After running tests:
+- `before-upload.png` - Screenshot before upload attempt (for debugging)
 - `resume-upload-success.png` - Screenshot on success
 - `resume-upload-failure.png` - Screenshot on failure
 - `logs/naukri-automation.log` - Detailed logs
 - `test-output/` - TestNG HTML reports
+
+**Note:** All `.png` files are excluded from Git and overwritten on each run.
 
 ## Contributing
 

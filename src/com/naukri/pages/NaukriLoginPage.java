@@ -74,18 +74,44 @@ public class NaukriLoginPage {
         logger.info("Entering email: {}", email);
         WebElement emailElement = wait.until(ExpectedConditions.visibilityOfElementLocated(emailInput));
         emailElement.clear();
-        emailElement.sendKeys(email);
+        
+        // Type slowly to mimic human behavior
+        for (char c : email.toCharArray()) {
+            emailElement.sendKeys(String.valueOf(c));
+            try {
+                Thread.sleep(100 + (int)(Math.random() * 100)); // 100-200ms per character
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
     
     public void enterPassword(String password) {
         logger.info("Entering password");
         WebElement passwordElement = wait.until(ExpectedConditions.visibilityOfElementLocated(passwordInput));
         passwordElement.clear();
-        passwordElement.sendKeys(password);
+        
+        // Type slowly to mimic human behavior
+        for (char c : password.toCharArray()) {
+            passwordElement.sendKeys(String.valueOf(c));
+            try {
+                Thread.sleep(100 + (int)(Math.random() * 100)); // 100-200ms per character
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
     
     public void clickLoginButton() {
         logger.info("Clicking Login button");
+        
+        // Small delay before clicking
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
         WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(loginButton));
         loginBtn.click();
     }

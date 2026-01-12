@@ -29,6 +29,15 @@ public class NaukriProfilePage {
     public void navigateToProfile() {
         logger.info("Navigating to profile page");
         driver.get("https://www.naukri.com/mnjuser/profile");
+        
+        // Wait for profile page to load
+        try {
+            Thread.sleep(3000);
+            logger.info("Profile page loaded - URL: {}", driver.getCurrentUrl());
+            logger.info("Profile page title: {}", driver.getTitle());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
     
     public void waitForHomePageLoad() {
@@ -46,16 +55,60 @@ public class NaukriProfilePage {
                 ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(@href,'profile')]"))
             ));
             logger.info("Login successful - Current page title: {}", driver.getTitle());
+            logger.info("Current URL: {}", driver.getCurrentUrl());
         } catch (Exception e) {
             logger.warn("Could not verify login with standard checks, current title: {}", driver.getTitle());
+            logger.warn("Current URL: {}", driver.getCurrentUrl());
             // Continue anyway as we're past the login page
         }
     }
     
     public void clickUploadResumeButton() {
         logger.info("Clicking upload resume button");
-        WebElement uploadBtn = wait.until(ExpectedConditions.elementToBeClickable(uploadResumeButton));
-        uploadBtn.click();
+        logger.info("Looking for element with xpath: //input[@class='dummyUpload typ-14Bold']");
+        
+        try {
+            // Try multiple possible locators for the upload button
+            WebElement uploadBtn = null;
+            
+            try {
+                uploadBtn = wait.until(ExpectedConditions.elementToBeClickable(uploadResumeButton));
+                logger.info("Found upload button with primary locator");
+            } catch (Exception e1) {
+                logger.warn("Primary locator failed, trying alternative locators");
+                
+                // Try alternative locators
+                By[] alternativeLocators = {
+                    By.xpath("//button[contains(text(),'Update Resume')]"),
+                    By.xpath("//a[contains(text(),'Update Resume')]"),
+                    By.xpath("//div[contains(@class,'updateResume')]//input"),
+                    By.cssSelector("input[type='file'][id*='CV']"),
+                    By.cssSelector("input.dummyUpload")
+                };
+                
+                for (By locator : alternativeLocators) {
+                    try {
+                        uploadBtn = wait.until(ExpectedConditions.elementToBeClickable(locator));
+                        logger.info("Found upload button with alternative locator: {}", locator);
+                        break;
+                    } catch (Exception e2) {
+                        logger.debug("Alternative locator failed: {}", locator);
+                    }
+                }
+            }
+            
+            if (uploadBtn != null) {
+                uploadBtn.click();
+                logger.info("Upload button clicked successfully");
+            } else {
+                throw new RuntimeException("Could not find upload resume button with any locator");
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to click upload button. Current URL: {}", driver.getCurrentUrl());
+            logger.error("Page source length: {}", driver.getPageSource().length());
+            throw e;
+        }
     }
     
     public void uploadResume(File resumeFile) {
@@ -66,7 +119,16 @@ public class NaukriProfilePage {
     
     public void uploadResumeComplete(File resumeFile) {
         navigateToProfile();
-        clickUploadResumeButton();
-        uploadResume(resumeFile);
+        
+        // Try direct file upload first (more reliable)
+        try {
+            logger.info("Attempting direct file upload");
+            uploadResume(resumeFile);
+            logger.info("Direct file upload successful");
+        } catch (Exception e) {
+            logger.warn("Direct upload failed, trying button click method");
+            clickUploadResumeButton();
+            uploadResume(resumeFile);
+        }
     }
 }
