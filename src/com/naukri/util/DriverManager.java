@@ -33,6 +33,14 @@ public class DriverManager {
     private static WebDriver createChrome() throws IOException {
         logger.info("Setting up ChromeDriver");
         
+        // In CI environment, set ChromeDriver path explicitly
+        String ciEnv = System.getenv("CI");
+        if ("true".equalsIgnoreCase(ciEnv)) {
+            String driverPath = "/usr/local/bin/chromedriver";
+            System.setProperty("webdriver.chrome.driver", driverPath);
+            logger.info("CI environment: ChromeDriver path set to {}", driverPath);
+        }
+        
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--no-sandbox");

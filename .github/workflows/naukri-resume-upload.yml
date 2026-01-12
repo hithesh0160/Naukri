@@ -58,7 +58,11 @@ jobs:
           NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
           NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
           SE_AVOID_STATS: true
-        run: mvn clean test
+        run: |
+          # Set ChromeDriver path
+          export PATH=$PATH:/usr/local/bin
+          which chromedriver
+          mvn clean test -Dwebdriver.chrome.driver=/usr/local/bin/chromedriver
       
       - name: Upload Screenshots
         if: always()
