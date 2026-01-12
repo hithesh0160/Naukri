@@ -2,6 +2,7 @@ package com.naukri.util;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -9,6 +10,7 @@ import org.openqa.selenium.PageLoadStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,14 +35,6 @@ public class DriverManager {
     private static WebDriver createChrome() throws IOException {
         logger.info("Setting up ChromeDriver");
         
-        // In CI environment, set ChromeDriver path explicitly
-        String ciEnv = System.getenv("CI");
-        if ("true".equalsIgnoreCase(ciEnv)) {
-            String driverPath = "/usr/local/bin/chromedriver";
-            System.setProperty("webdriver.chrome.driver", driverPath);
-            logger.info("CI environment: ChromeDriver path set to {}", driverPath);
-        }
-        
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--no-sandbox");
@@ -59,7 +53,27 @@ public class DriverManager {
         
         logger.info("Chrome options configured (headless mode for CI)");
         
-        WebDriver driver = new ChromeDriver(options);
+        // In CI environment, explicitly create ChromeDriverService with driver path
+        String ciEnv = System.getenv("CI");
+        WebDriver driver;
+        
+        if ("true".equalsIgnoreCase(ciEnv)) {
+            File driverFile = new File("/usr/local/bin/chromedriver");
+            if (driverFile.exists()) {
+                logger.info("Using ChromeDriver at: {}", driverFile.getAbsolutePath());
+                ChromeDriverService service = new ChromeDriverService.Builder()
+                    .usingDriverExecutable(driverFile)
+                    .usingAnyFreePort()
+                    .build();
+                driver = new ChromeDriver(service, options);
+            } else {
+                logger.warn("ChromeDriver not found at /usr/local/bin/chromedriver, using default");
+                driver = new ChromeDriver(options);
+            }
+        } else {
+            driver = new ChromeDriver(options);
+        }
+        
         logger.info("Chrome WebDriver created successfully");
         
         return driver;
@@ -86,3 +100,4 @@ public class DriverManager {
         return driver;
     }
 }
+
