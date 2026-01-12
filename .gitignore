@@ -13,6 +13,7 @@ config.properties
 # Logs
 *.log
 logs/
+cron.log
 
 # IDE files
 .settings/
