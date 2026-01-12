@@ -118,9 +118,43 @@ public class NaukriLoginPage {
     
     public void login(String username, String password) {
         navigateToNaukri();
+        
+        // Add delay to let page fully load
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
         clickLoginLink();
+        
+        // Add delay after clicking login link
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
         enterEmail(username);
+        
+        // Small delay between email and password
+        try {
+            Thread.sleep(800);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
         enterPassword(password);
+        
+        // Delay before clicking login button
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
         clickLoginButton();
+        
+        logger.info("Login form submitted, waiting for response");
     }
 }

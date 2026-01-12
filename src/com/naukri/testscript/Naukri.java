@@ -49,6 +49,9 @@ public class Naukri {
             // Login to Naukri
             loginPage.login(username, password);
             
+            // Capture screenshot right after login
+            ScreenshotUtil.captureScreenshot(driver, "after-login.png");
+            
             // Wait for successful login
             profilePage.waitForHomePageLoad();
             logger.info("Login successful");

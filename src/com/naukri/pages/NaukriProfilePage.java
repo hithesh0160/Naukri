@@ -43,6 +43,24 @@ public class NaukriProfilePage {
     public void waitForHomePageLoad() {
         logger.info("Waiting for successful login");
         
+        try {
+            // Wait longer for login to process
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        // Log current state
+        logger.info("Current URL after login: {}", driver.getCurrentUrl());
+        logger.info("Current title after login: {}", driver.getTitle());
+        
+        // Check if still on login page (login failed)
+        if (driver.getCurrentUrl().contains("login.naukri.com")) {
+            logger.error("Still on login page - login may have failed");
+            logger.error("Possible reasons: incorrect credentials, bot detection, or CAPTCHA");
+            throw new RuntimeException("Login failed - still on login page");
+        }
+        
         // Wait for URL to change from login page
         wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("login.naukri.com")));
         
@@ -59,6 +77,11 @@ public class NaukriProfilePage {
         } catch (Exception e) {
             logger.warn("Could not verify login with standard checks, current title: {}", driver.getTitle());
             logger.warn("Current URL: {}", driver.getCurrentUrl());
+            
+            // Check again if we're on login page
+            if (driver.getCurrentUrl().contains("login")) {
+                throw new RuntimeException("Login verification failed - appears to still be on login page");
+            }
             // Continue anyway as we're past the login page
         }
     }

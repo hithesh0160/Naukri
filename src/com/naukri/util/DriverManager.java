@@ -50,8 +50,24 @@ public class DriverManager {
         options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
         options.setExperimentalOption("useAutomationExtension", false);
         
+        // Additional anti-detection arguments
+        options.addArguments("--disable-web-security");
+        options.addArguments("--disable-features=IsolateOrigins,site-per-process");
+        options.addArguments("--allow-running-insecure-content");
+        options.addArguments("--disable-infobars");
+        options.addArguments("--disable-notifications");
+        options.addArguments("--disable-popup-blocking");
+        options.addArguments("--disable-save-password-bubble");
+        
         // Set a realistic user agent
         options.addArguments("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36");
+        
+        // Set additional preferences to appear more human
+        java.util.Map<String, Object> prefs = new java.util.HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        prefs.put("profile.default_content_setting_values.notifications", 2);
+        options.setExperimentalOption("prefs", prefs);
         
         options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
         
@@ -83,9 +99,18 @@ public class DriverManager {
         
         // Execute CDP commands to further hide automation
         if ("true".equalsIgnoreCase(ciEnv)) {
-            ((ChromeDriver) driver).executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", 
+            ChromeDriver chromeDriver = (ChromeDriver) driver;
+            
+            // Hide webdriver property
+            chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", 
                 java.util.Map.of("source", 
                     "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"));
+            
+            // Override other automation indicators
+            chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", 
+                java.util.Map.of("source", 
+                    "Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});" +
+                    "Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});"));
         }
         
         logger.info("Chrome WebDriver created successfully");
