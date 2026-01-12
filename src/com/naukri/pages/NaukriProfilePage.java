@@ -32,8 +32,24 @@ public class NaukriProfilePage {
     }
     
     public void waitForHomePageLoad() {
-        logger.info("Waiting for Home page to load");
-        wait.until(ExpectedConditions.titleContains("Home | Mynaukri"));
+        logger.info("Waiting for successful login");
+        
+        // Wait for URL to change from login page
+        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("login.naukri.com")));
+        
+        // Wait for either the title to contain "Naukri" or a logged-in element to appear
+        try {
+            // Try to wait for a common logged-in element (profile link, user menu, etc.)
+            wait.until(ExpectedConditions.or(
+                ExpectedConditions.titleContains("Naukri"),
+                ExpectedConditions.presenceOfElementLocated(By.xpath("//div[contains(@class,'nI-gNb-drawer')]")),
+                ExpectedConditions.presenceOfElementLocated(By.xpath("//a[contains(@href,'profile')]"))
+            ));
+            logger.info("Login successful - Current page title: {}", driver.getTitle());
+        } catch (Exception e) {
+            logger.warn("Could not verify login with standard checks, current title: {}", driver.getTitle());
+            // Continue anyway as we're past the login page
+        }
     }
     
     public void clickUploadResumeButton() {
