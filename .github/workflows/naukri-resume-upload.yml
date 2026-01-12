@@ -64,3 +64,6 @@ jobs:
           name: logs-${{ github.run_number }}
           path: logs/
           if-no-files-found: ignore
+      
+      - name: Update dependency graph
+        uses: advanced-security/maven-dependency-submission-action@v4
