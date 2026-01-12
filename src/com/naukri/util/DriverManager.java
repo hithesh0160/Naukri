@@ -36,22 +36,29 @@ public class DriverManager {
         logger.info("Setting up ChromeDriver");
         
         ChromeOptions options = new ChromeOptions();
+        
+        // Make browser look more like a real user to avoid bot detection
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--remote-allow-origins=*");
-        options.addArguments("--headless=new");  // Always headless in CI
+        options.addArguments("--headless=new");
         
-        // Custom user agent (optional - uncomment if needed)
-        // options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        // Anti-detection measures
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+        options.setExperimentalOption("useAutomationExtension", false);
+        
+        // Set a realistic user agent
+        options.addArguments("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36");
         
         options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
         
         Path userDataDir = Files.createTempDirectory("chrome-user-data-");
         options.addArguments("--user-data-dir=" + userDataDir.toString());
         
-        logger.info("Chrome options configured (headless mode for CI)");
+        logger.info("Chrome options configured (headless mode for CI with anti-detection)");
         
         // In CI environment, explicitly create ChromeDriverService with driver path
         String ciEnv = System.getenv("CI");
@@ -72,6 +79,13 @@ public class DriverManager {
             }
         } else {
             driver = new ChromeDriver(options);
+        }
+        
+        // Execute CDP commands to further hide automation
+        if ("true".equalsIgnoreCase(ciEnv)) {
+            ((ChromeDriver) driver).executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", 
+                java.util.Map.of("source", 
+                    "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"));
         }
         
         logger.info("Chrome WebDriver created successfully");
