@@ -31,18 +31,9 @@ public class DriverManager {
     }
     
     private static WebDriver createChrome() throws IOException {
-        logger.info("Setting up ChromeDriver (Selenium Manager will handle driver automatically)");
+        logger.info("Setting up ChromeDriver");
         
         ChromeOptions options = new ChromeOptions();
-        
-        // In CI environment, explicitly set Chrome binary location
-        String ciEnv = System.getenv("CI");
-        if ("true".equalsIgnoreCase(ciEnv)) {
-            // GitHub Actions Chrome location
-            options.setBinary("/usr/bin/google-chrome");
-            logger.info("CI environment: Chrome binary set to /usr/bin/google-chrome");
-        }
-        
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -67,7 +58,7 @@ public class DriverManager {
     }
     
     private static WebDriver createFirefox() {
-        logger.info("Setting up FirefoxDriver (Selenium Manager will handle driver automatically)");
+        logger.info("Setting up FirefoxDriver");
         
         FirefoxOptions options = new FirefoxOptions();
         options.addArguments("--width=1920");

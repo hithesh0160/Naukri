@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: '30 2 * * *'
   
+  # Run on every push to main branch
+  push:
+    branches:
+      - main
+  
   # Manual trigger
   workflow_dispatch:
 
@@ -23,17 +28,30 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-      
-      - name: Verify Chrome installation
+      - name: Install Chrome and ChromeDriver
         run: |
-          which google-chrome-stable
+          # Install Chrome
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          
+          # Get Chrome version
+          CHROME_VERSION=$(google-chrome-stable --version | awk '{print $3}' | cut -d'.' -f1)
+          echo "Chrome version: $CHROME_VERSION"
+          
+          # Install matching ChromeDriver
+          CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$CHROME_VERSION")
+          echo "ChromeDriver version: $CHROMEDRIVER_VERSION"
+          
+          wget -q "https://storage.googleapis.com/chrome-for-testing-public/$CHROMEDRIVER_VERSION/linux64/chromedriver-linux64.zip"
+          unzip -q chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+          
+          # Verify installations
           google-chrome-stable --version
-          # Create symlink for Selenium Manager
-          sudo ln -sf /usr/bin/google-chrome-stable /usr/bin/google-chrome
+          chromedriver --version
       
       - name: Run Naukri Resume Upload Test
         env:
