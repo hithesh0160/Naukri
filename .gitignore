@@ -1,0 +1,36 @@
+# Build outputs
+/bin/
+/target/
+test-output/
+
+# Sensitive files - DO NOT COMMIT
+config.properties
+**/config.properties
+*.properties
+!config.properties.example
+!last_resume_uploaded.properties
+
+# Logs
+*.log
+logs/
+
+# IDE files
+.settings/
+.classpath
+.project
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compiled files
+*.class
+
+# Screenshots
+*.png
+
+# JAR files (using Maven)
+*.jar

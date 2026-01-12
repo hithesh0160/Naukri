@@ -1,0 +1,66 @@
+name: Naukri Resume Upload
+
+on:
+  # Scheduled run daily at 8:00 AM IST (2:30 AM UTC)
+  schedule:
+    - cron: '30 2 * * *'
+  
+  # Manual trigger
+  workflow_dispatch:
+
+jobs:
+  upload-resume:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+      
+      - name: Verify Chrome installation
+        run: |
+          which google-chrome-stable
+          google-chrome-stable --version
+      
+      - name: Run Naukri Resume Upload Test
+        env:
+          NAUKRI_USERNAME: ${{ secrets.NAUKRI_USERNAME }}
+          NAUKRI_PASSWORD: ${{ secrets.NAUKRI_PASSWORD }}
+        run: mvn clean test
+      
+      - name: Upload Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.run_number }}
+          path: |
+            *.png
+            resume-*.png
+          if-no-files-found: ignore
+      
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ github.run_number }}
+          path: test-output/
+          if-no-files-found: ignore
+      
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ github.run_number }}
+          path: logs/
+          if-no-files-found: ignore
