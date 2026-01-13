@@ -1,0 +1,1 @@
+Returned fields: ['trend_direction', 'trend_strength', 'rsi', 'atr_normalized', 'rsi_zone']
