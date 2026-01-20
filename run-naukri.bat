@@ -14,6 +14,9 @@ REM Set Maven path
 set MAVEN_HOME=D:\hites\Downloads\apache-maven-3.9.12-bin\apache-maven-3.9.12
 set PATH=%MAVEN_HOME%\bin;%PATH%
 
+REM Set headless mode (set to "false" to see browser, "true" for headless)
+set HEADLESS=true
+
 REM Verify Maven is available
 echo Checking Maven installation...
 call mvn -version

@@ -125,12 +125,18 @@ public class DriverManager {
         options.addArguments("--width=1920");
         options.addArguments("--height=1080");
         
-        // Headless mode - uncomment for headless execution
-        // options.addArguments("--headless");
+        // Check if headless mode is requested via environment variable
+        String headlessMode = System.getenv("HEADLESS");
+        boolean isHeadless = "true".equalsIgnoreCase(headlessMode);
+        
+        if (isHeadless) {
+            options.addArguments("--headless");
+            logger.info("Firefox running in HEADLESS mode");
+        } else {
+            logger.info("Firefox running in VISIBLE mode");
+        }
         
         options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
-        
-        logger.info("Firefox options configured (visible browser for local testing)");
         
         WebDriver driver = new FirefoxDriver(options);
         driver.manage().window().maximize();
