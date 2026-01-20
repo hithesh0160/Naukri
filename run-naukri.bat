@@ -10,8 +10,23 @@ echo.
 REM Change to script directory
 cd /d "%~dp0"
 
+REM Set Maven path
+set MAVEN_HOME=D:\hites\Downloads\apache-maven-3.9.12-bin\apache-maven-3.9.12
+set PATH=%MAVEN_HOME%\bin;%PATH%
+
+REM Verify Maven is available
+echo Checking Maven installation...
+call mvn -version
+if errorlevel 1 (
+    echo ERROR: Maven not found at %MAVEN_HOME%
+    echo Please update MAVEN_HOME in this script
+    pause
+    exit /b 1
+)
+
+echo.
+echo Running tests with visible browser...
 REM Run Maven test
-echo Running tests...
 call mvn clean test
 
 echo.

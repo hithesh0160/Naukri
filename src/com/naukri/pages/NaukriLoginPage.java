@@ -75,15 +75,8 @@ public class NaukriLoginPage {
         WebElement emailElement = wait.until(ExpectedConditions.visibilityOfElementLocated(emailInput));
         emailElement.clear();
         
-        // Type slowly to mimic human behavior
-        for (char c : email.toCharArray()) {
-            emailElement.sendKeys(String.valueOf(c));
-            try {
-                Thread.sleep(100 + (int)(Math.random() * 100)); // 100-200ms per character
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+        // Fast typing for login (commented slow typing)
+        emailElement.sendKeys(email);
     }
     
     public void enterPassword(String password) {
@@ -91,15 +84,8 @@ public class NaukriLoginPage {
         WebElement passwordElement = wait.until(ExpectedConditions.visibilityOfElementLocated(passwordInput));
         passwordElement.clear();
         
-        // Type slowly to mimic human behavior
-        for (char c : password.toCharArray()) {
-            passwordElement.sendKeys(String.valueOf(c));
-            try {
-                Thread.sleep(100 + (int)(Math.random() * 100)); // 100-200ms per character
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+        // Fast typing for login (commented slow typing)
+        passwordElement.sendKeys(password);
     }
     
     public void clickLoginButton() {

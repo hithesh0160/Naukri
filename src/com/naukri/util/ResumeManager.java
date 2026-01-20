@@ -15,8 +15,8 @@ public class ResumeManager {
     
     private static final String STATE_FILE = "src/com/naukri/config/last_resume_uploaded.properties";
     private static final String[] RESUME_FILES = {
-        "data/resume1.pdf",
-        "data/resume2.pdf"
+        "data/Hithesh_SDET_Playwright_Java_Automation_Test_Engineer_Bangalore.pdf",
+        "data/Hithesh_SDET_Selenium_Java_Automation_Test_Engineer_Bangalore.pdf"
     };
     
     public File getNextResumeFile() throws IOException {
