@@ -115,8 +115,8 @@ password=your_naukri_password
 3. **Add resume files**
 
 Place two PDF files in `data/`:
-- `resume1.pdf`
-- `resume2.pdf`
+- `Hithesh_SDET_Playwright_Java_Automation_Test_Engineer_Bangalore.pdf`
+- `Hithesh_SDET_Selenium_Java_Automation_Test_Engineer_Bangalore.pdf`
 
 4. **Run tests**
 ```bash
@@ -248,7 +248,7 @@ These measures make the automation appear more like a real user, reducing the li
 
 ### Resume Rotation
 
-Alternates between `resume1.pdf` and `resume2.pdf` on each run. State tracked in `last_resume_uploaded.properties`.
+Alternates between `Hithesh_SDET_Playwright_Java_Automation_Test_Engineer_Bangalore.pdf` and `Hithesh_SDET_Selenium_Java_Automation_Test_Engineer_Bangalore.pdf` on each run. State tracked in `last_resume_uploaded.properties`.
 
 ### Logging
 
@@ -267,7 +267,11 @@ Install from https://www.mozilla.org/firefox/
 Create `src/com/naukri/config/config.properties` from the example file.
 
 ### Resume file not found
-Ensure files are named exactly `resume1.pdf` and `resume2.pdf` in `data/` folder.
+Ensure files are named exactly:
+- `Hithesh_SDET_Playwright_Java_Automation_Test_Engineer_Bangalore.pdf`
+- `Hithesh_SDET_Selenium_Java_Automation_Test_Engineer_Bangalore.pdf`
+
+And placed in the `data/` folder.
 
 ### Test fails
 Check logs in `logs/naukri-automation.log` and screenshots (`.png` files).

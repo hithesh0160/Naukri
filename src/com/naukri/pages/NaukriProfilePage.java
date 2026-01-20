@@ -1,8 +1,10 @@
 package com.naukri.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -20,6 +22,16 @@ public class NaukriProfilePage {
     // Locators
     private final By uploadResumeButton = By.xpath("//input[@class='dummyUpload typ-14Bold']");
     private final By attachCVInput = By.id("attachCV");
+    
+    // About section locators
+    private final By aboutEditIcon = By.xpath("//span[contains(text(),'Profile summary')]//following::span[@class='edit icon']");
+    private final By aboutTextArea = By.xpath("//textarea[contains(@id,'profileSummary') or contains(@class,'profileSummary') or @name='summary']");
+    private final By aboutSaveButton = By.xpath("//button[contains(@class,'saveBtn') or contains(text(),'Save') or @type='submit']");
+    
+    // Alternative: Headline section locators
+    private final By headlineEditIcon = By.xpath("//span[contains(text(),'Resume headline')]//following::span[@class='edit icon']");
+    private final By headlineTextArea = By.xpath("//textarea[@id='resumeHeadlineTxt']");
+    private final By headlineSaveButton = By.xpath("//button[contains(@class,'saveBtn') or contains(text(),'Save')]");
     
     public NaukriProfilePage(WebDriver driver) {
         this.driver = driver;
@@ -152,6 +164,225 @@ public class NaukriProfilePage {
             logger.warn("Direct upload failed, trying button click method");
             clickUploadResumeButton();
             uploadResume(resumeFile);
+        }
+    }
+    
+    /**
+     * Updates the About/Profile Summary section by adding a space or minor change
+     * This helps move the profile to the top of recruiter searches
+     */
+    public void updateAboutSection() {
+        logger.info("Updating About/Profile Summary section");
+        
+        try {
+            // Wait for profile page to be ready
+            Thread.sleep(2000);
+            
+            // Close any overlays or popups that might be blocking
+            try {
+                logger.info("Checking for overlays/popups to close");
+                // Try to close any modal/overlay
+                driver.findElements(By.xpath("//div[contains(@class,'crossIcon')]")).forEach(element -> {
+                    try {
+                        element.click();
+                        logger.info("Closed an overlay");
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                });
+                
+                // Try ESC key to close any popups
+                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                logger.debug("No overlays to close or already closed");
+            }
+            
+            // Find and click the edit icon for About section
+            logger.info("Looking for About section edit button");
+            WebElement editIcon = wait.until(ExpectedConditions.presenceOfElementLocated(aboutEditIcon));
+            
+            // Scroll to the element
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("arguments[0].scrollIntoView(true);", editIcon);
+            Thread.sleep(500);
+            
+            // Try regular click first
+            try {
+                editIcon.click();
+                logger.info("Clicked About section edit button (regular click)");
+            } catch (Exception e) {
+                // If regular click fails, use JavaScript click
+                logger.info("Regular click failed, trying JavaScript click");
+                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", editIcon);
+                logger.info("Clicked About section edit button (JavaScript click)");
+            }
+            
+            // Wait for text area to appear
+            Thread.sleep(1500);
+            
+            // Find the text area (using generic locator that works)
+            logger.info("Looking for text area after clicking edit");
+            WebElement textArea = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//textarea")));
+            
+            if (!textArea.isDisplayed()) {
+                throw new RuntimeException("Text area found but not visible");
+            }
+            
+            // Get current text
+            String currentText = textArea.getAttribute("value");
+            if (currentText == null || currentText.isEmpty()) {
+                currentText = textArea.getText();
+            }
+            logger.info("Current About text length: {} characters", currentText != null ? currentText.length() : 0);
+            
+            // Make a substantial change that Naukri will accept
+            // Strategy: Add/remove a marker phrase at the end
+            if (currentText != null && !currentText.isEmpty()) {
+                String updatedText;
+                String marker1 = " #OpenToWork";
+                String marker2 = " #Hiring";
+                
+                // Check which marker is currently present and alternate
+                if (currentText.trim().endsWith(marker1)) {
+                    // Remove marker1, add marker2
+                    updatedText = currentText.trim().substring(0, currentText.trim().length() - marker1.length()) + marker2;
+                    logger.info("Changing About section: Replacing '{}' with '{}'", marker1, marker2);
+                } else if (currentText.trim().endsWith(marker2)) {
+                    // Remove marker2, back to original (no marker)
+                    updatedText = currentText.trim().substring(0, currentText.trim().length() - marker2.length());
+                    logger.info("Changing About section: Removing '{}'", marker2);
+                } else {
+                    // Add marker1
+                    updatedText = currentText.trim() + marker1;
+                    logger.info("Changing About section: Adding '{}'", marker1);
+                }
+                
+                logger.info("Original text (last 50 chars): ...{}", currentText.substring(Math.max(0, currentText.length() - 50)));
+                logger.info("Updated text (last 50 chars): ...{}", updatedText.substring(Math.max(0, updatedText.length() - 50)));
+                
+                // Clear and update the text
+                textArea.clear();
+                Thread.sleep(500);
+                textArea.sendKeys(updatedText);
+                logger.info("Text entered into About section");
+                
+                // Wait a bit before saving
+                Thread.sleep(1000);
+                
+                // Click save button
+                logger.info("Looking for Save button");
+                WebElement saveButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//button[@type='submit']")));
+                
+                // Scroll to save button
+                js.executeScript("arguments[0].scrollIntoView(true);", saveButton);
+                Thread.sleep(500);
+                
+                // Use JavaScript click (more reliable)
+                js.executeScript("arguments[0].click();", saveButton);
+                logger.info("Clicked Save button");
+                
+                // Wait for save to complete
+                Thread.sleep(3000);
+                
+                logger.info("About section update completed");
+            } else {
+                logger.warn("About section is empty, skipping update");
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to update About section: {}", e.getMessage());
+            logger.warn("Trying alternative: updating Resume Headline instead");
+            
+            // Try updating headline as fallback
+            try {
+                updateHeadlineSection();
+            } catch (Exception e2) {
+                logger.error("Failed to update Headline section as well: {}", e2.getMessage());
+                logger.warn("Continuing with resume upload despite profile update failure");
+            }
+        }
+    }
+    
+    /**
+     * Updates the Resume Headline section as an alternative to About section
+     */
+    private void updateHeadlineSection() throws InterruptedException {
+        logger.info("Updating Resume Headline section");
+        
+        try {
+            // Wait for profile page to be ready
+            Thread.sleep(2000);
+            
+            // Close any overlays
+            try {
+                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                // Ignore
+            }
+            
+            // Find and click the edit icon for Headline section
+            logger.info("Looking for Headline section edit button");
+            WebElement editIcon = wait.until(ExpectedConditions.presenceOfElementLocated(headlineEditIcon));
+            
+            // Scroll to element
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", editIcon);
+            Thread.sleep(500);
+            
+            // Try JavaScript click
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", editIcon);
+            logger.info("Clicked Headline section edit button");
+            
+            // Wait for text area to appear
+            Thread.sleep(1500);
+            
+            // Find the text area
+            WebElement textArea = wait.until(ExpectedConditions.presenceOfElementLocated(headlineTextArea));
+            String currentText = textArea.getAttribute("value");
+            logger.info("Current Headline text length: {} characters", currentText != null ? currentText.length() : 0);
+            
+            if (currentText != null && !currentText.isEmpty()) {
+                String updatedText;
+                
+                // Add or remove a period at the end
+                if (currentText.trim().endsWith(".")) {
+                    updatedText = currentText.trim().substring(0, currentText.trim().length() - 1);
+                    logger.info("Removing trailing period from Headline");
+                } else {
+                    updatedText = currentText.trim() + ".";
+                    logger.info("Adding trailing period to Headline");
+                }
+                
+                // Clear and update the text
+                textArea.clear();
+                Thread.sleep(500);
+                textArea.sendKeys(updatedText);
+                logger.info("Text entered into Headline section");
+                
+                // Wait before saving
+                Thread.sleep(1000);
+                
+                // Click save button
+                WebElement saveButton = wait.until(ExpectedConditions.presenceOfElementLocated(headlineSaveButton));
+                
+                // Scroll and click with JavaScript
+                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", saveButton);
+                Thread.sleep(500);
+                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
+                logger.info("Clicked Save button for Headline section");
+                
+                // Wait for save to complete
+                Thread.sleep(3000);
+                logger.info("Headline section update completed");
+                
+            } else {
+                logger.warn("Headline section is empty, skipping update");
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to update Headline section: {}", e.getMessage());
+            throw e;
         }
     }
 }

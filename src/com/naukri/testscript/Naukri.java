@@ -56,6 +56,11 @@ public class Naukri {
             profilePage.waitForHomePageLoad();
             logger.info("Login successful");
             
+            // Navigate to profile and update About section first
+            logger.info("Updating profile About section to boost visibility");
+            profilePage.navigateToProfile();
+            profilePage.updateAboutSection();
+            
             // Get next resume file to upload
             ResumeManager resumeManager = new ResumeManager();
             File resumeFile = resumeManager.getNextResumeFile();
