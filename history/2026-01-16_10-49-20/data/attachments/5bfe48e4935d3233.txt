@@ -1,1 +1,0 @@
-trend_direction: 1.0
