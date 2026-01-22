@@ -153,8 +153,6 @@ public class NaukriProfilePage {
     }
     
     public void uploadResumeComplete(File resumeFile) {
-        navigateToProfile();
-        
         // Try direct file upload first (more reliable)
         try {
             logger.info("Attempting direct file upload");
