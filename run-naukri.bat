@@ -17,6 +17,12 @@ set PATH=%MAVEN_HOME%\bin;%PATH%
 REM Set headless mode (set to "false" to see browser, "true" for headless)
 set HEADLESS=true
 
+REM Set Telegram credentials (optional - leave empty to disable notifications)
+REM Get your bot token from @BotFather on Telegram
+REM Get your chat ID from @userinfobot on Telegram
+set TELEGRAM_TOKEN=8086512864:AAFaV0N-BlaWWIksESX-eN4ceUqmFfXtB7U
+set TELEGRAM_CHAT_ID=504069398
+
 REM Verify Maven is available
 echo Checking Maven installation...
 call mvn -version
