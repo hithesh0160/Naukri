@@ -56,10 +56,13 @@ public class Naukri {
             profilePage.waitForHomePageLoad();
             logger.info("Login successful");
             
-            // Navigate to profile and update About section first
-            logger.info("Updating profile About section to boost visibility");
+            // Navigate to profile for resume upload
+            logger.info("Navigating to profile for resume upload");
             profilePage.navigateToProfile();
-            profilePage.updateAboutSection();
+            
+            // Note: Profile text updates (Headline/About) disabled
+            // Naukri detects and blocks automated text changes
+            // Resume upload alone is sufficient to trigger "recently updated" status
             
             // Get next resume file to upload
             ResumeManager resumeManager = new ResumeManager();
