@@ -305,9 +305,10 @@ public class NaukriProfilePage {
     }
     
     /**
-     * Updates the Resume Headline section as an alternative to About section
+     * Updates the Resume Headline section to boost profile visibility
+     * This helps move the profile to the top of recruiter searches
      */
-    private void updateHeadlineSection() throws InterruptedException {
+    public void updateHeadlineSection() {
         logger.info("Updating Resume Headline section");
         
         try {
@@ -316,10 +317,11 @@ public class NaukriProfilePage {
             
             // Close any overlays
             try {
+                logger.info("Checking for overlays/popups to close");
                 driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
                 Thread.sleep(1000);
             } catch (Exception e) {
-                // Ignore
+                logger.debug("No overlays to close");
             }
             
             // Find and click the edit icon for Headline section
@@ -327,11 +329,12 @@ public class NaukriProfilePage {
             WebElement editIcon = wait.until(ExpectedConditions.presenceOfElementLocated(headlineEditIcon));
             
             // Scroll to element
-            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", editIcon);
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("arguments[0].scrollIntoView(true);", editIcon);
             Thread.sleep(500);
             
-            // Try JavaScript click
-            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", editIcon);
+            // Click with JavaScript (more reliable)
+            js.executeScript("arguments[0].click();", editIcon);
             logger.info("Clicked Headline section edit button");
             
             // Wait for text area to appear
@@ -340,19 +343,33 @@ public class NaukriProfilePage {
             // Find the text area
             WebElement textArea = wait.until(ExpectedConditions.presenceOfElementLocated(headlineTextArea));
             String currentText = textArea.getAttribute("value");
+            if (currentText == null || currentText.isEmpty()) {
+                currentText = textArea.getText();
+            }
             logger.info("Current Headline text length: {} characters", currentText != null ? currentText.length() : 0);
             
             if (currentText != null && !currentText.isEmpty()) {
                 String updatedText;
+                String marker1 = " | Open to Work";
+                String marker2 = " | Actively Looking";
                 
-                // Add or remove a period at the end
-                if (currentText.trim().endsWith(".")) {
-                    updatedText = currentText.trim().substring(0, currentText.trim().length() - 1);
-                    logger.info("Removing trailing period from Headline");
+                // Check which marker is currently present and alternate
+                if (currentText.trim().endsWith(marker1)) {
+                    // Remove marker1, add marker2
+                    updatedText = currentText.trim().substring(0, currentText.trim().length() - marker1.length()) + marker2;
+                    logger.info("Changing Headline: Replacing '{}' with '{}'", marker1, marker2);
+                } else if (currentText.trim().endsWith(marker2)) {
+                    // Remove marker2, back to original (no marker)
+                    updatedText = currentText.trim().substring(0, currentText.trim().length() - marker2.length());
+                    logger.info("Changing Headline: Removing '{}'", marker2);
                 } else {
-                    updatedText = currentText.trim() + ".";
-                    logger.info("Adding trailing period to Headline");
+                    // Add marker1
+                    updatedText = currentText.trim() + marker1;
+                    logger.info("Changing Headline: Adding '{}'", marker1);
                 }
+                
+                logger.info("Original text (last 50 chars): ...{}", currentText.substring(Math.max(0, currentText.length() - 50)));
+                logger.info("Updated text (last 50 chars): ...{}", updatedText.substring(Math.max(0, updatedText.length() - 50)));
                 
                 // Clear and update the text
                 textArea.clear();
@@ -364,16 +381,56 @@ public class NaukriProfilePage {
                 Thread.sleep(1000);
                 
                 // Click save button
+                logger.info("Looking for Save button");
                 WebElement saveButton = wait.until(ExpectedConditions.presenceOfElementLocated(headlineSaveButton));
                 
                 // Scroll and click with JavaScript
-                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", saveButton);
+                js.executeScript("arguments[0].scrollIntoView(true);", saveButton);
                 Thread.sleep(500);
-                ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
+                js.executeScript("arguments[0].click();", saveButton);
                 logger.info("Clicked Save button for Headline section");
                 
                 // Wait for save to complete
                 Thread.sleep(3000);
+                
+                // Verify the save was successful
+                logger.info("Verifying Headline was saved...");
+                driver.navigate().refresh();
+                Thread.sleep(2000);
+                
+                try {
+                    // Click edit again to verify
+                    WebElement editIconVerify = driver.findElement(headlineEditIcon);
+                    js.executeScript("arguments[0].scrollIntoView(true);", editIconVerify);
+                    Thread.sleep(500);
+                    js.executeScript("arguments[0].click();", editIconVerify);
+                    Thread.sleep(1500);
+                    
+                    WebElement textAreaVerify = driver.findElement(headlineTextArea);
+                    String verifyText = textAreaVerify.getAttribute("value");
+                    if (verifyText == null || verifyText.isEmpty()) {
+                        verifyText = textAreaVerify.getText();
+                    }
+                    
+                    logger.info("Verification - Current text (last 50 chars): ...{}", 
+                        verifyText.substring(Math.max(0, verifyText.length() - 50)));
+                    
+                    if (verifyText.equals(updatedText)) {
+                        logger.info("✅ Headline update VERIFIED - Change was saved successfully!");
+                    } else {
+                        logger.warn("⚠️ Headline update NOT saved - Text reverted to original");
+                        logger.warn("Expected: ...{}", updatedText.substring(Math.max(0, updatedText.length() - 50)));
+                        logger.warn("Got: ...{}", verifyText.substring(Math.max(0, verifyText.length() - 50)));
+                    }
+                    
+                    // Close edit mode
+                    driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                    Thread.sleep(1000);
+                    
+                } catch (Exception e) {
+                    logger.warn("Could not verify Headline update: {}", e.getMessage());
+                }
+                
                 logger.info("Headline section update completed");
                 
             } else {
@@ -382,7 +439,7 @@ public class NaukriProfilePage {
             
         } catch (Exception e) {
             logger.error("Failed to update Headline section: {}", e.getMessage());
-            throw e;
+            logger.warn("Continuing with resume upload despite Headline update failure");
         }
     }
 }

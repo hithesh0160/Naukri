@@ -39,12 +39,16 @@ echo Putting PC to sleep in 10 seconds...
 echo ========================================
 echo.
 
-REM Wait 10 seconds before sleep (time to check results if needed)
+REM Wait 10 seconds before hibernate (time to check results if needed)
 timeout /t 10 /nobreak
 
-REM Put PC to sleep
-echo Going to sleep now...
-rundll32.exe powrprof.dll,SetSuspendState 0,1,0
+REM Put PC to hibernate (zero power, can wake automatically)
+echo Going to hibernate now...
+shutdown /h
 
-REM Note: If sleep doesn't work, use shutdown instead:
-REM shutdown /h
+REM Alternative options (uncomment if needed):
+REM Sleep mode (2-5W power):
+REM rundll32.exe powrprof.dll,SetSuspendState 0,1,0
+REM
+REM Full shutdown (cannot wake automatically):
+REM shutdown /s /t 0
