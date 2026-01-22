@@ -26,17 +26,19 @@ Get instant notifications on your phone when the Naukri automation runs!
 2. Click **Start** or send `/start`
 3. This allows the bot to send you messages
 
-### Step 4: Configure the Batch File
+### Step 4: Configure Credentials
 
-Edit `run-and-sleep.bat`:
+**Option 1: Config File (Recommended - More Secure)**
 
-```batch
-REM Set Telegram credentials
-set TELEGRAM_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
-set TELEGRAM_CHAT_ID=123456789
+Edit `src/com/naukri/config/config.properties`:
+
+```properties
+# Telegram Notification Settings (optional)
+telegram.token=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
+telegram.chatid=123456789
 ```
 
-**Or set as Windows Environment Variables (more secure):**
+**Option 2: Environment Variables**
 
 1. Press `Win + R`
 2. Type: `sysdm.cpl` and press Enter
@@ -48,6 +50,8 @@ set TELEGRAM_CHAT_ID=123456789
    - Variable name: `TELEGRAM_CHAT_ID`
    - Variable value: `your_chat_id`
 6. Click **OK** to save
+
+**Note:** Config file takes priority over environment variables.
 
 ### Step 5: Test It
 
@@ -129,10 +133,10 @@ mvn test -Dtest=Naukri#testResumeUpload
 
 To disable Telegram notifications:
 
-**Option 1:** Leave variables empty in `run-and-sleep.bat`:
-```batch
-set TELEGRAM_TOKEN=
-set TELEGRAM_CHAT_ID=
+**Option 1:** Remove from config file:
+```properties
+telegram.token=
+telegram.chatid=
 ```
 
 **Option 2:** Remove environment variables:
@@ -146,8 +150,9 @@ The automation will still work, just without notifications.
 ## Security Notes
 
 - ✅ Bot token is like a password - keep it secret
-- ✅ Don't commit bot token to Git
-- ✅ Use environment variables instead of hardcoding
+- ✅ Credentials stored in `config.properties` (excluded from git)
+- ✅ Never commit `config.properties` to Git
+- ✅ Use `config.properties.example` as template
 - ✅ Only you can message your bot (it's private)
 - ⚠️ Anyone with your bot token can send messages as your bot
 

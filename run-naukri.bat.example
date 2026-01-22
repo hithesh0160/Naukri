@@ -1,0 +1,45 @@
+@echo off
+REM Naukri Resume Upload Automation
+REM Copy this file to run-naukri.bat and configure paths
+
+echo ========================================
+echo Naukri Resume Upload Automation
+echo ========================================
+echo.
+
+REM Change to script directory
+cd /d "%~dp0"
+
+REM Set Maven path - UPDATE THIS PATH
+set MAVEN_HOME=D:\path\to\apache-maven-3.9.12
+set PATH=%MAVEN_HOME%\bin;%PATH%
+
+REM Set headless mode (false = show browser, true = headless)
+set HEADLESS=false
+
+REM Telegram credentials are now in config.properties
+REM No need to set environment variables here
+
+REM Verify Maven is available
+echo Checking Maven installation...
+call mvn -version
+if errorlevel 1 (
+    echo ERROR: Maven not found at %MAVEN_HOME%
+    echo Please update MAVEN_HOME in this script
+    pause
+    exit /b 1
+)
+
+echo.
+echo Running tests...
+REM Run Maven test
+call mvn clean test
+
+echo.
+echo ========================================
+echo Execution completed
+echo Check logs folder for details
+echo ========================================
+echo.
+
+pause

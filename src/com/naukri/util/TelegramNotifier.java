@@ -18,9 +18,35 @@ import java.util.List;
 public class TelegramNotifier {
     private static final Logger logger = LoggerFactory.getLogger(TelegramNotifier.class);
     
-    private static final String BOT_TOKEN = System.getenv("TELEGRAM_TOKEN");
-    private static final String CHAT_ID = System.getenv("TELEGRAM_CHAT_ID");
+    private static final String BOT_TOKEN;
+    private static final String CHAT_ID;
     private static final int MESSAGE_LIMIT = 3800; // Telegram limit is 4096, keep buffer
+    
+    static {
+        // Try to read from config.properties first, fallback to environment variables
+        String token = null;
+        String chatId = null;
+        
+        try {
+            token = ConfigUtil.getConfig("telegram.token", "telegram.token");
+            chatId = ConfigUtil.getConfig("telegram.chatid", "telegram.chatid");
+            
+            // If config values are empty or placeholder, try environment variables
+            if (token == null || token.isEmpty() || token.equals("telegram.token")) {
+                token = System.getenv("TELEGRAM_TOKEN");
+            }
+            if (chatId == null || chatId.isEmpty() || chatId.equals("telegram.chatid")) {
+                chatId = System.getenv("TELEGRAM_CHAT_ID");
+            }
+        } catch (Exception e) {
+            logger.debug("Could not read from config, trying environment variables");
+            token = System.getenv("TELEGRAM_TOKEN");
+            chatId = System.getenv("TELEGRAM_CHAT_ID");
+        }
+        
+        BOT_TOKEN = token;
+        CHAT_ID = chatId;
+    }
     
     public static void sendSuccessNotification(String resumeName) {
         if (!isConfigured()) {

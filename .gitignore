@@ -10,6 +10,10 @@ config.properties
 !config.properties.example
 !last_resume_uploaded.properties
 
+# Batch files with credentials
+run-naukri.bat
+run-and-sleep.bat
+
 # Logs
 *.log
 logs/

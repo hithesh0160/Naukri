@@ -2,3 +2,10 @@
 # Copy this file to config.properties and add your credentials
 username=your_email@example.com
 password=your_password
+
+# Telegram Notification Settings (optional)
+# Get bot token from @BotFather on Telegram
+# Get chat ID from @userinfobot on Telegram
+# Leave empty to disable notifications
+telegram.token=
+telegram.chatid=
