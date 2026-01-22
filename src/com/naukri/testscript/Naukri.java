@@ -41,6 +41,7 @@ public class Naukri {
     
     @Test
     public void testResumeUpload() {
+        String resumeName = null;
         try {
             // Get credentials
             String username = ConfigUtil.getConfig("NAUKRI_USERNAME", "username");
@@ -67,6 +68,7 @@ public class Naukri {
             // Get next resume file to upload
             ResumeManager resumeManager = new ResumeManager();
             File resumeFile = resumeManager.getNextResumeFile();
+            resumeName = resumeFile.getName();
             
             // Capture screenshot before upload attempt
             ScreenshotUtil.captureScreenshot(driver, "before-upload.png");
@@ -82,6 +84,9 @@ public class Naukri {
             
             logger.info("=== Resume upload completed successfully ===");
             
+            // Send success notification to Telegram
+            com.naukri.util.TelegramNotifier.sendSuccessNotification(resumeName);
+            
             // Assert test passed
             Assert.assertTrue(true, "Resume uploaded successfully");
             
@@ -92,6 +97,9 @@ public class Naukri {
             if (driver != null) {
                 ScreenshotUtil.captureScreenshot(driver, "resume-upload-failure.png");
             }
+            
+            // Send failure notification to Telegram
+            com.naukri.util.TelegramNotifier.sendFailureNotification(e.getMessage());
             
             Assert.fail("Resume upload failed: " + e.getMessage());
         }
