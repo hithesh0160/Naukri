@@ -52,7 +52,6 @@ telegram.chatid=123456789
 6. Click **OK** to save
 
 **Note:** Config file takes priority over environment variables.
-
 ### Step 5: Test It
 
 Run the automation:
