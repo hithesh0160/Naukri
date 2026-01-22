@@ -1,102 +1,110 @@
 # Naukri Resume Upload Automation
 
-Automated Selenium-based framework for uploading resumes to Naukri.com daily. Runs locally with Firefox and on GitHub Actions with Chrome.
-
-## Important Limitations
-
-### GitHub Actions OTP Issue
-
-**⚠️ Known Issue:** Naukri.com triggers OTP verification when logging in from GitHub Actions due to:
-- New/changing IP addresses on each run
-- Detection of automated browser behavior
-- Security measures for suspicious login patterns
-
-**Current Status:** GitHub Actions automation is **not reliable** due to OTP requirements.
-
-📖 **[Read the complete Automation Guide](AUTOMATION-GUIDE.md)** for detailed explanations and solutions.
-
-**Recommended Solutions:**
-
-1. **Local Automation (Recommended)** ✅
-   - Run the script on your local machine/server with consistent IP
-   - Set up a scheduled task (Windows Task Scheduler / cron)
-   - Works reliably without OTP issues
-
-2. **Self-Hosted GitHub Runner** ✅
-   - Use your own machine as a GitHub Actions runner
-   - Maintains consistent IP address
-   - [Setup Guide](https://docs.github.com/en/actions/hosting-your-own-runners)
-
-3. **Manual GitHub Actions** ⚠️
-   - Keep workflow for manual triggers only
-   - Remove scheduled runs
-   - Use when you can handle OTP manually
-
-### Local Scheduled Automation
-
-**Windows (Task Scheduler):**
-
-1. **Use the provided batch file:**
-   - Double-click `run-naukri.bat` to test
-   - Or run from command prompt: `run-naukri.bat`
-
-2. **Schedule in Task Scheduler:**
-   - Open Task Scheduler (search in Start menu)
-   - Click "Create Basic Task"
-   - Name: "Naukri Resume Upload"
-   - Trigger: Daily at 8:00 AM
-   - Action: Start a program
-   - Program: `C:\path\to\Naukri\run-naukri.bat`
-   - Finish
-
-**Linux/Mac (cron):**
-
-1. **Make script executable:**
-```bash
-chmod +x run-naukri.sh
-```
-
-2. **Test the script:**
-```bash
-./run-naukri.sh
-```
-
-3. **Schedule with cron:**
-```bash
-# Edit crontab
-crontab -e
-
-# Add line (runs daily at 8:00 AM)
-0 8 * * * /path/to/Naukri/run-naukri.sh >> /path/to/Naukri/cron.log 2>&1
-```
+Automated Selenium-based framework for uploading resumes to Naukri.com daily. Runs locally in headless mode with auto-wake and auto-hibernate scheduling.
 
 ## Features
 
-- ✅ Automated daily resume upload at 8:00 AM IST (local scheduling recommended)
-- ✅ Alternates between two resume files
-- ✅ Local testing with Firefox (visible browser)
-- ✅ GitHub Actions with Chrome (headless) - **Limited by OTP requirements**
-- ✅ Screenshot capture on success/failure
-- ✅ Comprehensive logging
-- ✅ Page Object Model architecture
-- ✅ Environment-based configuration
-- ✅ Advanced anti-bot detection measures
-- ✅ Human-like interaction patterns
+- ✅ **Automated daily resume upload** at 6:30 AM (Windows scheduled task with auto-wake)
+- ✅ **Alternates between two resume files** (Playwright and Selenium versions)
+- ✅ **Headless mode** - Runs invisibly in background
+- ✅ **Auto-hibernate** after execution (zero power consumption)
+- ✅ **Local execution** with consistent IP (no OTP issues)
+- ✅ **Screenshot capture** on success/failure
+- ✅ **Comprehensive logging**
+- ✅ **Page Object Model** architecture
 
-## Quick Start
+**Note:** Profile text updates (Headline/About section) are not automated as Naukri detects and blocks automated text changes. Resume upload alone is sufficient to trigger "recently updated" status. **For best results, manually update your Resume Headline once a week.**
+
+## Quick Start (10 Minutes)
 
 ### Prerequisites
 
 - **Java 17+** ([Download](https://adoptium.net/))
 - **Maven 3.6+** ([Download](https://maven.apache.org/download.cgi))
-- **Firefox** (for local testing) ([Download](https://www.mozilla.org/firefox/))
+- **Firefox** ([Download](https://www.mozilla.org/firefox/))
 - **Git** ([Download](https://git-scm.com/downloads))
+- **Windows 10/11** (for auto-wake scheduling)
 
 ### Local Setup (5 Minutes)
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/YOUR_USERNAME/Naukri.git
+git clone https://github.com/hithesh0160/Naukri.git
+cd Naukri
+```
+
+2. **Configure credentials**
+```bash
+cd src/com/naukri/config
+cp config.properties.example config.properties
+```
+
+Edit `config.properties`:
+```properties
+username=your_naukri_email@example.com
+password=your_naukri_password
+```
+
+3. **Add resume files**
+
+Place two PDF files in `data/`:
+- `Hithesh_SDET_Playwright_Java_Automation_Test_Engineer_Bangalore.pdf.pdf`
+- `Hithesh_SDET_Selenium_Java_Automation_Test_Engineer_Bangalore.pdf.pdf`
+
+4. **Test the automation**
+```cmd
+# Test with visible browser
+set HEADLESS=false
+run-naukri.bat
+
+# Test with headless mode (recommended)
+set HEADLESS=true
+run-naukri.bat
+```
+
+5. **Setup automated scheduling** (see below)
+
+---
+
+## Windows Auto-Wake Setup
+
+Your PC will automatically:
+1. ⏰ Wake from hibernate at 6:30 AM
+2. 🤖 Run automation (headless, invisible)
+3. 💤 Hibernate again (zero power)
+
+**Power cost:** ~₹35-50/month (10 minutes daily)
+
+### Quick Setup (5 Minutes)
+
+**Step 1: Enable Wake Timers**
+1. Control Panel → Power Options → Change plan settings
+2. Change advanced power settings → Sleep → Allow wake timers → **Enable**
+
+**Step 2: Enable Hibernate**
+```powershell
+# Run in PowerShell (Admin)
+powercfg /hibernate on
+```
+
+**Step 3: Create Scheduled Task**
+```powershell
+# Run in PowerShell (Admin)
+cd "D:\Naukri Job Update\Naukri"  # Update path
+
+$action = New-ScheduledTaskAction -Execute "$PWD\run-and-sleep.bat" -WorkingDirectory $PWD
+$trigger = New-ScheduledTaskTrigger -Daily -At "06:30"
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -WakeToRun
+$principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Highest
+
+Register-ScheduledTask -TaskName "Naukri Resume Upload" -Description "Daily Naukri profile update" -Action $action -Trigger $trigger -Settings $settings -Principal $principal
+```
+
+**Done!** Your PC will now wake daily at 6:30 AM, run the automation, and hibernate.
+
+📖 **For detailed setup guide, see:** [WINDOWS-AUTO-WAKE-GUIDE.md](WINDOWS-AUTO-WAKE-GUIDE.md)
+
+---
 cd Naukri
 ```
 
