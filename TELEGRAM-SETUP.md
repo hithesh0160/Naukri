@@ -28,7 +28,7 @@ Get instant notifications on your phone when the Naukri automation runs!
 
 ### Step 4: Configure Credentials
 
-**Option 1: Config File (Recommended - More Secure)**
+**Option 1: Config File (Recommended)**
 
 Edit `src/com/naukri/config/config.properties`:
 
@@ -51,12 +51,12 @@ telegram.chatid=123456789
    - Variable value: `your_chat_id`
 6. Click **OK** to save
 
-**Note:** Config file takes priority over environment variables.
+**Note:** `config.properties` values take priority over environment variables.
 ### Step 5: Test It
 
 Run the automation:
 ```cmd
-.\run-and-sleep.bat
+run-naukri.bat
 ```
 
 You should receive a Telegram message like:
@@ -115,14 +115,11 @@ You should receive a Telegram message like:
 
 ### Test manually
 
-Create a test file `test-telegram.bat`:
-```batch
-@echo off
+Quick validation command:
+
+```cmd
 set TELEGRAM_TOKEN=your_token_here
 set TELEGRAM_CHAT_ID=your_chat_id_here
-set HEADLESS=true
-
-cd /d "%~dp0"
 mvn test -Dtest=Naukri#testResumeUpload
 ```
 
@@ -149,7 +146,7 @@ The automation will still work, just without notifications.
 ## Security Notes
 
 - ✅ Bot token is like a password - keep it secret
-- ✅ Credentials stored in `config.properties` (excluded from git)
+- ✅ Keep credentials only in local `config.properties` or local environment variables
 - ✅ Never commit `config.properties` to Git
 - ✅ Use `config.properties.example` as template
 - ✅ Only you can message your bot (it's private)

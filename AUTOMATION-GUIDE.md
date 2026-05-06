@@ -46,30 +46,16 @@ The most reliable approach is to run the automation on your local machine or a s
 
 #### Linux/Mac Users
 
-1. **Make script executable:**
-   ```bash
-   chmod +x run-naukri.sh
-   ```
+This repository currently includes Windows batch launchers (`run-naukri.bat`, `run-and-sleep.bat`) and does not ship a maintained `run-naukri.sh`.
 
-2. **Test the script:**
-   ```bash
-   ./run-naukri.sh
-   ```
+If you want Linux/Mac scheduling, run the Java command with cron directly:
 
-3. **Set up cron job:**
-   ```bash
-   crontab -e
-   ```
-   
-   Add this line:
-   ```
-   0 8 * * * /full/path/to/Naukri/run-naukri.sh >> /full/path/to/Naukri/cron.log 2>&1
-   ```
+```bash
+cd /full/path/to/Naukri
+mvn clean test >> /full/path/to/Naukri/cron.log 2>&1
+```
 
-4. **Verify cron job:**
-   ```bash
-   crontab -l
-   ```
+Then add it to `crontab -e` at your preferred schedule.
 
 ### Alternative: Self-Hosted GitHub Runner
 
@@ -109,7 +95,7 @@ If you're getting OTP even on your local machine:
 2. **Check Java version:** Must be Java 17 or higher
 3. **Check Firefox:** Must be installed for local runs
 4. **Check credentials:** Verify config.properties has correct username/password
-5. **Check resume files:** Ensure resume1.pdf and resume2.pdf exist in data/ folder
+5. **Check resume files:** Ensure files expected by `ResumeManager` exist in `data/`
 
 ### Logs Show Errors
 
@@ -124,6 +110,7 @@ If you're getting OTP even on your local machine:
 3. **Update resumes:** Replace PDF files when you update your resume
 4. **Test after changes:** Run manually after any code changes
 5. **Backup configuration:** Keep a copy of your config.properties
+6. **Avoid over-updating:** Once daily upload is usually enough for freshness
 
 ## Why Not Use GitHub Actions?
 

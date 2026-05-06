@@ -1,56 +1,31 @@
 # Security Guide
 
-## Sensitive Files
+## Sensitive Data in This Project
 
-The following files contain sensitive information and are excluded from git:
+Treat the following as secrets:
 
-### 1. Configuration Files
-- `src/com/naukri/config/config.properties` - Contains Naukri credentials and Telegram tokens
-- Use `config.properties.example` as a template
+- `src/com/naukri/config/config.properties` (Naukri credentials and optional Telegram token/chat ID)
+- Environment variables (`NAUKRI_USERNAME`, `NAUKRI_PASSWORD`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`)
+- Screenshots and logs (may contain personal profile/account details)
 
-### 2. Batch Files (Local Only)
-- `run-naukri.bat` - May contain local paths
-- `run-and-sleep.bat` - May contain local paths
-- Use `.example` versions as templates
+Use `src/com/naukri/config/config.properties.example` as template and keep `config.properties` local only.
 
-### 3. Screenshots
-- `*.png` - May contain personal information from profile
+## Local Setup Checklist
 
-## Setup for New Users
+1. Create `config.properties` from the example file.
+2. Add credentials locally (never commit).
+3. Ensure `run-naukri.bat` and `run-and-sleep.bat` do not contain real secrets.
 
-1. **Copy example files:**
-   ```cmd
-   copy src\com\naukri\config\config.properties.example src\com\naukri\config\config.properties
-   copy run-naukri.bat.example run-naukri.bat
-   copy run-and-sleep.bat.example run-and-sleep.bat
-   ```
+## If Secrets Were Exposed
 
-2. **Edit config.properties:**
-   - Add your Naukri username and password
-   - Add your Telegram bot token and chat ID (optional)
+1. Rotate all exposed credentials immediately:
+   - Change Naukri password
+   - Revoke/regen Telegram bot token from `@BotFather`
+2. Remove secrets from current files and commit the cleanup.
+3. If already pushed, rewrite git history with a dedicated cleanup tool, then force-push carefully.
+4. Notify collaborators to re-clone if history was rewritten.
 
-3. **Edit batch files:**
-   - Update Maven path to match your installation
-   - Adjust other settings as needed
-
-## Removing Secrets from Git History
-
-If you accidentally committed sensitive data:
-
-1. **Run the cleanup script:**
-   ```cmd
-   .\remove-secrets-from-history.bat
-   ```
-
-2. **Force push to remote:**
-   ```cmd
-   git push origin --force --all
-   git push origin --force --tags
-   ```
-
-3. **Revoke compromised credentials:**
-   - Change your Naukri password
-   - Create a new Telegram bot (revoke old token via @BotFather)
+Note: this repository does not include an automated history-cleanup script.
 
 ## Best Practices
 
@@ -73,7 +48,7 @@ The application reads credentials in this order:
 
 1. **config.properties** (highest priority)
 2. **Environment variables** (fallback)
-3. **Batch file variables** (deprecated, not recommended)
+3. **Batch file variables** (avoid storing secrets here)
 
 ## Reporting Security Issues
 

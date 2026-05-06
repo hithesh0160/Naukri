@@ -22,13 +22,22 @@ Your PC will:
 5. Set to **Enable** for both "On battery" and "Plugged in"
 6. Click **OK**
 
-### Step 2: Run Setup Script
+### Step 2: Create Scheduled Task (PowerShell)
 
-1. **Right-click** on `setup-scheduled-task.ps1`
-2. Select **"Run with PowerShell"**
-3. If prompted, click **"Yes"** to run as Administrator
+Run the following in **PowerShell as Administrator**:
 
-**That's it!** The task is now scheduled.
+```powershell
+cd "D:\Naukri Job Update\Naukri"  # Update this path
+
+$action = New-ScheduledTaskAction -Execute "$PWD\run-and-sleep.bat" -WorkingDirectory $PWD
+$trigger = New-ScheduledTaskTrigger -Daily -At "06:30"
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -WakeToRun
+$principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Highest
+
+Register-ScheduledTask -TaskName "Naukri Resume Upload" -Description "Daily Naukri profile update" -Action $action -Trigger $trigger -Settings $settings -Principal $principal
+```
+
+If this fails on your machine, use the Manual Setup section below.
 
 ---
 
@@ -227,7 +236,7 @@ A: No, only works from Sleep/Hibernate. PC must be in sleep mode, not shut down.
 A: Task will run in background (headless mode). You won't see any browser window.
 
 **Q: Can I change the time?**  
-A: Yes, edit the task in Task Scheduler or re-run setup script with different time.
+A: Yes, edit the task trigger in Task Scheduler or recreate the task with a different `-At` value.
 
 **Q: Will this drain my laptop battery?**  
 A: Minimal. ~10 minutes daily. Keep laptop plugged in at night for best results.
