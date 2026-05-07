@@ -43,6 +43,11 @@ public class Naukri {
     public void testResumeUpload() {
         String resumeName = null;
         try {
+            // Add a random delay between 10 seconds and 2 minutes to appear more organic
+            int randomDelayMs = 10000 + (int)(Math.random() * 110000);
+            logger.info("Waiting for {} ms (organic start delay)...", randomDelayMs);
+            Thread.sleep(randomDelayMs);
+            
             // Get credentials
             String username = ConfigUtil.getConfig("NAUKRI_USERNAME", "username");
             String password = ConfigUtil.getConfig("NAUKRI_PASSWORD", "password");
@@ -61,9 +66,18 @@ public class Naukri {
             logger.info("Navigating to profile for resume upload");
             profilePage.navigateToProfile();
             
-            // Note: Profile text updates (Headline/About) disabled
-            // Naukri detects and blocks automated text changes
-            // Resume upload alone is sufficient to trigger "recently updated" status
+            // Update Profile text with human-like typing to avoid bot detection
+            try {
+                profilePage.updateHeadlineSection();
+                profilePage.updateAboutSection();
+                
+                // Add a random key skill derived from the resume data
+                String[] resumeSkills = {"Java", "Selenium", "TestNG", "Maven", "Jenkins", "Playwright", "SQL", "API Testing", "Postman", "Agile"};
+                String randomSkill = resumeSkills[(int)(Math.random() * resumeSkills.length)];
+                profilePage.updateKeySkills(randomSkill);
+            } catch (Exception e) {
+                logger.warn("Profile update failed, continuing with resume upload: {}", e.getMessage());
+            }
             
             // Get next resume file to upload
             ResumeManager resumeManager = new ResumeManager();

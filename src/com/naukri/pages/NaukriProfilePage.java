@@ -259,11 +259,11 @@ public class NaukriProfilePage {
                 logger.info("Original text (last 50 chars): ...{}", currentText.substring(Math.max(0, currentText.length() - 50)));
                 logger.info("Updated text (last 50 chars): ...{}", updatedText.substring(Math.max(0, updatedText.length() - 50)));
                 
-                // Clear and update the text
+                // Clear and update the text organically
                 textArea.clear();
                 Thread.sleep(500);
-                textArea.sendKeys(updatedText);
-                logger.info("Text entered into About section");
+                humanLikeType(textArea, updatedText);
+                logger.info("Text entered into About section organically");
                 
                 // Wait a bit before saving
                 Thread.sleep(1000);
@@ -369,11 +369,11 @@ public class NaukriProfilePage {
                 logger.info("Original text (last 50 chars): ...{}", currentText.substring(Math.max(0, currentText.length() - 50)));
                 logger.info("Updated text (last 50 chars): ...{}", updatedText.substring(Math.max(0, updatedText.length() - 50)));
                 
-                // Clear and update the text
+                // Clear and update the text organically
                 textArea.clear();
                 Thread.sleep(500);
-                textArea.sendKeys(updatedText);
-                logger.info("Text entered into Headline section");
+                humanLikeType(textArea, updatedText);
+                logger.info("Text entered into Headline section organically");
                 
                 // Wait before saving
                 Thread.sleep(1000);
@@ -438,6 +438,126 @@ public class NaukriProfilePage {
         } catch (Exception e) {
             logger.error("Failed to update Headline section: {}", e.getMessage());
             logger.warn("Continuing with resume upload despite Headline update failure");
+        }
+    }
+    
+    /**
+     * Simulates human typing by adding random delays between keystrokes
+     * Helps bypass basic bot detection on text fields
+     */
+    private void humanLikeType(WebElement element, String text) throws InterruptedException {
+        for (char c : text.toCharArray()) {
+            element.sendKeys(String.valueOf(c));
+            // Random delay between 15 and 65 ms
+            Thread.sleep(15 + (long)(Math.random() * 50));
+        }
+    }
+    
+    /**
+     * Updates the Key Skills section by adding a new skill
+     * @param skill The skill to add
+     */
+    public void updateKeySkills(String skill) {
+        logger.info("Updating Key Skills section with skill: {}", skill);
+        
+        try {
+            Thread.sleep(2000);
+            
+            // Close any overlays
+            try {
+                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                Thread.sleep(1000);
+            } catch (Exception e) {}
+            
+            // Find and click the edit icon for Key Skills section
+            logger.info("Looking for Key Skills section edit button");
+            By keySkillsEditIcon = By.xpath("//span[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'key skills')]//following::span[contains(@class,'edit icon')][1]");
+            WebElement editIcon = wait.until(ExpectedConditions.presenceOfElementLocated(keySkillsEditIcon));
+            
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", editIcon);
+            Thread.sleep(1000);
+            
+            js.executeScript("arguments[0].click();", editIcon);
+            logger.info("Clicked Key Skills section edit button");
+            
+            Thread.sleep(2000);
+            
+            // Find the input field for adding skills
+            logger.info("Looking for Key Skills input field");
+            By skillInputLocators[] = {
+                By.xpath("//input[contains(@placeholder, 'Enter your key skills')]"),
+                By.xpath("//input[contains(@class, 'sugInp')]"),
+                By.id("keySkillSugg"),
+                By.xpath("//div[contains(@class,'chip-input')]//input")
+            };
+            
+            WebElement skillInput = null;
+            for (By locator : skillInputLocators) {
+                try {
+                    skillInput = driver.findElement(locator);
+                    if (skillInput.isDisplayed()) {
+                        break;
+                    }
+                } catch (Exception e) {}
+            }
+            
+            if (skillInput != null) {
+                logger.info("Found Key Skills input, entering skill: {}", skill);
+                humanLikeType(skillInput, skill);
+                Thread.sleep(1000);
+                
+                // Press Enter to add the skill as a pill
+                skillInput.sendKeys(Keys.ENTER);
+                Thread.sleep(1000);
+                
+                // Also click the first suggestion if it appears (common in Naukri)
+                try {
+                    WebElement firstSuggestion = driver.findElement(By.xpath("//div[contains(@class, 'sugg')]//li[1]"));
+                    js.executeScript("arguments[0].click();", firstSuggestion);
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    logger.debug("No dropdown suggestion clicked");
+                }
+                
+                // Click save button
+                logger.info("Looking for Save button");
+                By saveLocators[] = {
+                    By.xpath("//button[contains(@class,'saveBtn')]"),
+                    By.xpath("//button[contains(text(),'Save')]"),
+                    By.id("saveKeySkills")
+                };
+                
+                WebElement saveButton = null;
+                for (By locator : saveLocators) {
+                    try {
+                        saveButton = driver.findElement(locator);
+                        if (saveButton.isDisplayed()) {
+                            break;
+                        }
+                    } catch (Exception e) {}
+                }
+                
+                if (saveButton != null) {
+                    js.executeScript("arguments[0].click();", saveButton);
+                    logger.info("Clicked Save button for Key Skills section");
+                    Thread.sleep(3000);
+                    logger.info("✅ Key Skills update completed successfully");
+                } else {
+                    logger.warn("Could not find Save button for Key Skills");
+                    driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                }
+                
+            } else {
+                logger.warn("Could not find Key Skills input field");
+                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to update Key Skills section: {}", e.getMessage());
+            try {
+                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+            } catch (Exception ignored) {}
         }
     }
 }
