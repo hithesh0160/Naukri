@@ -1,0 +1,97 @@
+{
+  "name": "Trading-ML-LLM System API",
+  "version": "1.2",
+  "environment_snapshot": {
+    "timestamp": "2026-05-11T22:10:30.830291",
+    "capital": 10000.0,
+    "win_rate": "30.77%",
+    "net_pnl": "\u20b92,831.11",
+    "open_positions": 3,
+    "top_predictions_hotlist": [
+      {
+        "symbol": "LICHSGFIN",
+        "prob": "87.8%",
+        "rr": 4.0,
+        "limit": 588.15
+      },
+      {
+        "symbol": "COALINDIA",
+        "prob": "86.0%",
+        "rr": 3.98,
+        "limit": 463.37
+      },
+      {
+        "symbol": "YESBANK",
+        "prob": "82.4%",
+        "rr": 3.9,
+        "limit": 22.69
+      },
+      {
+        "symbol": "UPL",
+        "prob": "81.9%",
+        "rr": 4.0,
+        "limit": 667.63
+      },
+      {
+        "symbol": "ADANIGREEN",
+        "prob": "80.2%",
+        "rr": 4.0,
+        "limit": 1386.44
+      }
+    ],
+    "quant_metrics": {
+      "profit_factor": 1.95,
+      "sharpe_ratio": 3.95,
+      "max_drawdown": "10.48%",
+      "expectancy": "\u20b9189.22",
+      "market_regime": "NEUTRAL",
+      "market_breadth": "33.3%"
+    },
+    "config": {
+      "min_prob": 0.6,
+      "risk_pct": 0.01,
+      "max_pos": 3
+    }
+  },
+  "capabilities": [
+    "Precision Strategy: Dynamic ATR stops (1.0x - 1.5x) and targets (2.5x - 3.0x)",
+    "Ensemble Model: Dual-probability (Baseline + Trained) with agreement logic",
+    "SimpleMem: Historical pattern matching and confidence scoring",
+    "Trailing Stops: Automatic move-to-breakeven at 50% target reach",
+    "Multi-Provider: Support for Ollama, OpenAI, Anthropic, and Gemini"
+  ],
+  "endpoints": {
+    "structured_analysis": {
+      "path": "/api/llm/analyze/json",
+      "method": "GET",
+      "description": "Returns ALL ranked trades with full technical context and allocation strategy",
+      "schema": {
+        "ranked_trades": "Array<{symbol, probability, entry, limit_entry, rr_ratio, setup_score, expected_profit}>",
+        "top_recommendation": "Object",
+        "portfolio_strategy": "String",
+        "risk_analysis": "String"
+      }
+    },
+    "chat_qa": {
+      "path": "/api/llm/ask",
+      "method": "POST",
+      "description": "Accepts free-form questions with full system context injection"
+    },
+    "generate_report": {
+      "path": "/api/llm/report",
+      "method": "POST",
+      "description": "Generate and save LLM analysis report to markdown/JSON"
+    },
+    "generate_discovery": {
+      "path": "/api/llm/discovery",
+      "method": "POST",
+      "description": "Generate and save /api/llm discovery content as markdown report"
+    },
+    "list_reports": {
+      "path": "/api/llm/reports",
+      "method": "GET",
+      "description": "List available LLM analysis reports with metadata"
+    }
+  },
+  "agent_instructions": "1. Priority: Recommend BUY only when RR Ratio > 2.0 and Baseline Prob > 65%. 2. Validation: Cross-reference Baseline Prob with Learning Model Prob. 3. Risk: Check 'Open Positions' before suggesting new allocations. 4. Entry: Favor 'Limit Entry' prices for high-volatility (ATR) setups."
+}
