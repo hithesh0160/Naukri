@@ -8,6 +8,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.naukri.pages.NaukriJobApplyPage;
 import com.naukri.pages.NaukriLoginPage;
 import com.naukri.pages.NaukriProfilePage;
 import com.naukri.util.ConfigUtil;
@@ -23,6 +24,7 @@ public class Naukri {
     private WebDriver driver;
     private NaukriLoginPage loginPage;
     private NaukriProfilePage profilePage;
+    private NaukriJobApplyPage jobApplyPage;
     
     @BeforeMethod
     public void setup() throws Exception {
@@ -37,6 +39,7 @@ public class Naukri {
         // Initialize page objects
         loginPage = new NaukriLoginPage(driver);
         profilePage = new NaukriProfilePage(driver);
+        jobApplyPage = new NaukriJobApplyPage(driver);
     }
     
     @Test
@@ -100,6 +103,29 @@ public class Naukri {
             
             // Send success notification to Telegram
             com.naukri.util.TelegramNotifier.sendSuccessNotification(resumeName);
+            
+            // Auto-apply to jobs
+            try {
+                logger.info("Starting auto-apply to matching jobs...");
+                String[] searchKeywords = {
+                    "SDET Java", "Automation Testing Selenium", "Playwright",
+                    "QA Automation"
+                };
+                String location = "Bangalore";
+                java.util.List<String> allApplied = new java.util.ArrayList<>();
+                for (String keyword : searchKeywords) {
+                    java.util.List<String> applied = jobApplyPage.searchAndApply(keyword, location);
+                    allApplied.addAll(applied);
+                    logger.info("Applied to {} jobs for keyword: {}", applied.size(), keyword);
+                    Thread.sleep(5000 + (long)(Math.random() * 10000));
+                }
+                logger.info("=== Auto-apply completed - Total applied: {} ===", allApplied.size());
+                if (!allApplied.isEmpty()) {
+                    com.naukri.util.TelegramNotifier.sendJobApplicationSummary(allApplied, allApplied.size());
+                }
+            } catch (Exception e) {
+                logger.warn("Auto-apply failed: {}", e.getMessage());
+            }
             
             // Assert test passed
             Assert.assertTrue(true, "Resume uploaded successfully");

@@ -26,10 +26,17 @@ public class DriverManager {
         if (isCI) {
             logger.info("CI environment detected - using Chrome");
             return createChrome();
-        } else {
-            logger.info("Local environment detected - using Firefox");
+        }
+        
+        // Local: use BROWSER env var to choose, default to Chrome (better anti-detection)
+        String browser = System.getenv("BROWSER");
+        if ("firefox".equalsIgnoreCase(browser)) {
+            logger.info("Local environment detected - using Firefox (BROWSER=firefox)");
             return createFirefox();
         }
+        
+        logger.info("Local environment detected - using Chrome");
+        return createChrome();
     }
     
     private static WebDriver createChrome() throws IOException {
@@ -43,7 +50,16 @@ public class DriverManager {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--remote-allow-origins=*");
-        options.addArguments("--headless=new");
+        
+        // Respect HEADLESS env variable (default to headless for CI)
+        String headlessMode = System.getenv("HEADLESS");
+        boolean isHeadless = !"false".equalsIgnoreCase(headlessMode);
+        if (isHeadless) {
+            options.addArguments("--headless=new");
+            logger.info("Chrome running in HEADLESS mode");
+        } else {
+            logger.info("Chrome running in VISIBLE mode");
+        }
         
         // Anti-detection measures
         options.addArguments("--disable-blink-features=AutomationControlled");
@@ -60,7 +76,7 @@ public class DriverManager {
         options.addArguments("--disable-save-password-bubble");
         
         // Set a realistic user agent
-        options.addArguments("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36");
+        options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36");
         
         // Set additional preferences to appear more human
         java.util.Map<String, Object> prefs = new java.util.HashMap<>();
@@ -74,7 +90,7 @@ public class DriverManager {
         Path userDataDir = Files.createTempDirectory("chrome-user-data-");
         options.addArguments("--user-data-dir=" + userDataDir.toString());
         
-        logger.info("Chrome options configured (headless mode for CI with anti-detection)");
+        logger.info("Chrome options configured with anti-detection");
         
         // In CI environment, explicitly create ChromeDriverService with driver path
         String ciEnv = System.getenv("CI");
@@ -98,20 +114,18 @@ public class DriverManager {
         }
         
         // Execute CDP commands to further hide automation
-        if ("true".equalsIgnoreCase(ciEnv)) {
-            ChromeDriver chromeDriver = (ChromeDriver) driver;
-            
-            // Hide webdriver property
-            chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", 
-                java.util.Map.of("source", 
-                    "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"));
-            
-            // Override other automation indicators
-            chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", 
-                java.util.Map.of("source", 
-                    "Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});" +
-                    "Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});"));
-        }
+        ChromeDriver chromeDriver = (ChromeDriver) driver;
+        
+        // Hide webdriver property
+        chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", 
+            java.util.Map.of("source", 
+                "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"));
+        
+        // Override other automation indicators
+        chromeDriver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", 
+            java.util.Map.of("source", 
+                "Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});" +
+                "Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});"));
         
         logger.info("Chrome WebDriver created successfully");
         
@@ -136,10 +150,34 @@ public class DriverManager {
             logger.info("Firefox running in VISIBLE mode");
         }
         
+        // Anti-detection: set a realistic user agent for Windows
+        options.addPreference("general.useragent.override", 
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0");
+        
+        // Disable automation flags
+        options.addPreference("dom.webdriver.enabled", false);
+        options.addPreference("useAutomationExtension", false);
+        options.addPreference("dom.webnotifications.enabled", false);
+        options.addPreference("dom.push.enabled", false);
+        
+        // Disable password manager prompts
+        options.addPreference("signon.rememberSignons", false);
+        options.addPreference("signon.autofillForms", false);
+        
+        // Make Firefox appear less like automation
+        options.addPreference("privacy.trackingprotection.enabled", true);
+        options.addPreference("media.autoplay.default", 0);
+        
         options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
         
-        WebDriver driver = new FirefoxDriver(options);
+        FirefoxDriver driver = new FirefoxDriver(options);
         driver.manage().window().maximize();
+        
+        // Hide automation indicators via JS if visible mode
+        if (!isHeadless) {
+            driver.executeScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+        }
+        
         logger.info("Firefox WebDriver created successfully");
         
         return driver;

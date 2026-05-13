@@ -17,6 +17,9 @@ set PATH=%MAVEN_HOME%\bin;%PATH%
 REM Set headless mode (true for no browser window)
 set HEADLESS=true
 
+REM Use Chrome (better anti-detection, auto-downloads driver)
+set BROWSER=chrome
+
 REM Set Telegram credentials (optional - leave empty to disable notifications)
 REM Get your bot token from @BotFather on Telegram
 REM Get your chat ID from @userinfobot on Telegram
@@ -45,16 +48,9 @@ echo Putting PC to sleep in 10 seconds...
 echo ========================================
 echo.
 
-REM Wait 10 seconds before hibernate (time to check results if needed)
+REM Wait 10 seconds before sleep
 timeout /t 10 /nobreak
 
-REM Put PC to hibernate (zero power, can wake automatically)
-echo Going to hibernate now...
-shutdown /h
-
-REM Alternative options (uncomment if needed):
-REM Sleep mode (2-5W power):
-REM rundll32.exe powrprof.dll,SetSuspendState 0,1,0
-REM
-REM Full shutdown (cannot wake automatically):
-REM shutdown /s /t 0
+REM Sleep mode (preserves session, can wake via Task Scheduler)
+echo Going to sleep now...
+rundll32.exe powrprof.dll,SetSuspendState 0,1,0

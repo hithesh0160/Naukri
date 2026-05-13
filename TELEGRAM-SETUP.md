@@ -31,49 +31,33 @@ Get instant notifications on your phone when the Naukri automation runs!
 **Option 1: Config File (Recommended)**
 
 Edit `src/com/naukri/config/config.properties`:
-
 ```properties
-# Telegram Notification Settings (optional)
 telegram.token=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
 telegram.chatid=123456789
 ```
 
 **Option 2: Environment Variables**
 
-1. Press `Win + R`
-2. Type: `sysdm.cpl` and press Enter
-3. Go to **Advanced** tab → **Environment Variables**
-4. Under **User variables**, click **New**:
-   - Variable name: `TELEGRAM_TOKEN`
-   - Variable value: `your_bot_token`
-5. Click **New** again:
-   - Variable name: `TELEGRAM_CHAT_ID`
-   - Variable value: `your_chat_id`
-6. Click **OK** to save
+1. Press `Win + R` → `sysdm.cpl` → Advanced → Environment Variables
+2. Add User variables:
+   - `TELEGRAM_TOKEN` = your bot token
+   - `TELEGRAM_CHAT_ID` = your chat ID
 
-**Note:** `config.properties` values take priority over environment variables.
+**Note:** `config.properties` takes priority over environment variables.
+
 ### Step 5: Test It
 
-Run the automation:
 ```cmd
 run-naukri.bat
 ```
 
-You should receive a Telegram message like:
-
-```
-✅ Naukri Resume Upload Successful
-
-📄 Resume: Hithesh_SDET_Playwright_Java_Automation_Test_Engineer_Bangalore.pdf.pdf
-🕒 Time: 20-01-2026 14:30:45
-💻 Status: Completed successfully
-```
+You'll receive Telegram messages for each stage of the automation.
 
 ---
 
 ## Notification Types
 
-### Success Notification
+### Resume Upload Success
 ```
 ✅ Naukri Resume Upload Successful
 
@@ -81,6 +65,20 @@ You should receive a Telegram message like:
 🕒 Time: [timestamp]
 💻 Status: Completed successfully
 ```
+
+### Auto-Apply Summary
+```
+*Naukri Auto-Apply Summary*
+*Applied:* 7 jobs
+*Time:* 13-05-2026 14:30:00
+
+1. Wipro - SDET
+2. Infosys - Automation Engineer
+3. Amazon - QA SDET
+...
+```
+
+After the resume upload, this summary lists every company you applied to.
 
 ### Failure Notification
 ```
@@ -97,77 +95,30 @@ You should receive a Telegram message like:
 
 ### Not receiving messages?
 
-**Check 1: Bot token correct?**
-- Make sure you copied the full token from @BotFather
-- No spaces before/after the token
-
-**Check 2: Chat ID correct?**
-- Get it from @userinfobot
-- Should be just numbers
-
-**Check 3: Started chat with bot?**
-- Search for your bot on Telegram
-- Click Start button
-
-**Check 4: Environment variables set?**
-- Close and reopen PowerShell/Command Prompt
-- Or restart your PC
+1. **Bot token correct?** No spaces, full token from @BotFather
+2. **Chat ID correct?** Just numbers from @userinfobot
+3. **Started chat with bot?** Search bot → click Start
+4. **Env vars set?** Close and reopen terminal, or restart PC
 
 ### Test manually
-
-Quick validation command:
-
 ```cmd
 set TELEGRAM_TOKEN=your_token_here
 set TELEGRAM_CHAT_ID=your_chat_id_here
-mvn test -Dtest=Naukri#testResumeUpload
+mvn clean test
 ```
-
----
 
 ## Disable Notifications
 
-To disable Telegram notifications:
-
-**Option 1:** Remove from config file:
-```properties
-telegram.token=
-telegram.chatid=
-```
-
-**Option 2:** Remove environment variables:
-- System Properties → Environment Variables
-- Delete `TELEGRAM_TOKEN` and `TELEGRAM_CHAT_ID`
-
-The automation will still work, just without notifications.
-
----
+Remove from config or clear env vars. The automation still runs without notifications.
 
 ## Security Notes
 
 - ✅ Bot token is like a password - keep it secret
-- ✅ Keep credentials only in local `config.properties` or local environment variables
-- ✅ Never commit `config.properties` to Git
-- ✅ Use `config.properties.example` as template
+- ✅ Never commit credentials to Git
 - ✅ Only you can message your bot (it's private)
 - ⚠️ Anyone with your bot token can send messages as your bot
 
 ---
 
-## Advanced: Group Notifications
-
-Want notifications in a Telegram group?
-
-1. Create a Telegram group
-2. Add your bot to the group
-3. Make bot an admin
-4. Get group chat ID:
-   - Send a message in the group
-   - Visit: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
-   - Look for `"chat":{"id":-123456789` (negative number)
-   - Use this as TELEGRAM_CHAT_ID
-
----
-
-**Last Updated:** 2026-01-20  
-**Version:** 1.0.0
+**Last Updated:** 2026-05-13  
+**Version:** 2.0.0

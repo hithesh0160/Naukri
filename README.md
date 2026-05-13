@@ -1,68 +1,65 @@
 # Naukri Resume Upload Automation
 
-Automates daily resume upload on Naukri using Java + Selenium + TestNG.
+Automates daily resume upload + profile update + job auto-apply on Naukri using Java + Selenium + TestNG.
 
-The reliable setup is **local execution on a consistent IP** (Windows Task Scheduler recommended). GitHub Actions is kept for manual testing and often hits OTP checks.
+The reliable setup is **local execution on a consistent IP** (Windows Task Scheduler recommended).
 
 ## What This Project Does
 
-- Logs into Naukri and uploads resume from local `data/`.
-- Rotates between two resume files on each run.
-- Captures screenshots for success/failure troubleshooting.
-- Sends optional Telegram status notifications.
-- Supports unattended local runs via `run-naukri.bat` and `run-and-sleep.bat`.
+- **Logs in** to Naukri and navigates to profile
+- **Updates profile sections**: headline (verified save), about section, key skills
+- **Uploads resume** from local `data/` (rotates between two PDFs each run)
+- **Auto-applies** to matching jobs (SDET, Automation Testing, Playwright, QA Automation) via Easy Apply
+- **Captures screenshots** for success/failure troubleshooting
+- **Sends Telegram notifications** with resume status + list of companies applied to
+- **Supports unattended** local runs via `run-naukri.bat` and `run-and-sleep.bat`
 
 ## Prerequisites
 
 - Java 17+
 - Maven 3.6+
-- Firefox (for local runs)
+- Chrome (auto-downloads ChromeDriver via Selenium Manager)
 - Windows 10/11 (for wake + schedule flow)
 
 ## Quick Start
 
 1. Clone repo and open project folder.
-2. Create `src/com/naukri/config/config.properties` from `src/com/naukri/config/config.properties.example`.
-3. Add your values:
-
-```properties
-username=your_email@example.com
-password=your_password
-telegram.token=
-telegram.chatid=
-```
-
-4. Place resume files in `data/` using names expected by `src/com/naukri/util/ResumeManager.java`.
-5. Run once manually:
-
-```cmd
-run-naukri.bat
-```
-
-6. Set up scheduler for daily run (see `WINDOWS-AUTO-WAKE-GUIDE.md`).
+2. Create `src/com/naukri/config/config.properties`:
+   ```properties
+   username=your_email@example.com
+   password=your_password
+   telegram.token=
+   telegram.chatid=
+   ```
+3. Place resume files in `data/`.
+4. Run:
+   ```cmd
+   run-naukri.bat
+   ```
 
 ## Run Modes
 
-- `run-naukri.bat`: executes upload flow and exits.
-- `run-and-sleep.bat`: executes upload flow and then hibernates machine.
-- Direct Maven run:
+| Command | Headless | Browser | Sleep after |
+|---|---|---|---|
+| `run-naukri.bat` | No (visible) | Chrome | No |
+| `run-and-sleep.bat` | Yes (headless) | Chrome | Yes (S3 sleep) |
+| `mvn clean test` | Uses env vars | Chrome default | No |
 
-```cmd
-mvn clean test
-```
+**Environment variables:**
+- `HEADLESS=false` — set to `true` to hide browser
+- `BROWSER=chrome` — set to `firefox` to use Firefox
+
+## Auto-Apply Feature
+
+After profile update + resume upload, the script searches Naukri for:
+- `SDET Java`, `Automation Testing Selenium`, `Playwright`, `QA Automation`
+
+Applies to up to **10 jobs per run** with random delays (30-90s) to avoid detection. Applied jobs are tracked in `job_apply.properties` to prevent re-application within 30 days.
 
 ## Configuration Priority
 
-The app reads values in this order:
-
 1. `config.properties`
-2. Environment variables (`NAUKRI_USERNAME`, `NAUKRI_PASSWORD`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`)
-
-## Important Notes
-
-- Do not automate frequent profile edits. One update per day is enough.
-- Resume upload is the primary freshness signal; text/profile edits should be manual.
-- If login prompts OTP, local scheduling from your usual machine/IP is more reliable than cloud runners.
+2. Environment variables (`NAUKRI_USERNAME`, `NAUKRI_PASSWORD`, `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`, `HEADLESS`, `BROWSER`)
 
 ## Documentation
 
@@ -76,19 +73,12 @@ The app reads values in this order:
 - Screenshots: `*.png`
 - Logs: `logs/naukri-automation.log`
 - Test reports: `test-output/` and `target/surefire-reports/`
-
-These outputs are ignored by git.
-
-## GitHub Actions
-
-Workflow exists at `.github/workflows/naukri-resume-upload.yml`, but schedule is disabled by default due to OTP/IP reliability issues.
-
-Use `workflow_dispatch` for occasional manual checks, or a self-hosted runner with a consistent IP.
+- Applied jobs tracker: `src/com/naukri/config/job_apply.properties`
 
 ## Security
 
 - Never commit credentials, tokens, or personal data files.
-- Keep `config.properties` local only.
+- Keep `config.properties` and `job_apply.properties` local only.
 - Rotate credentials immediately if exposed.
 
 See `SECURITY.md` for remediation guidance.

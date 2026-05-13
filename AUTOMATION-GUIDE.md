@@ -9,99 +9,108 @@ Naukri.com implements security measures that trigger OTP (One-Time Password) ver
 
 **GitHub Actions Impact:** Each GitHub Actions run uses a different IP address from GitHub's pool, causing Naukri to treat every login as suspicious and require OTP verification. This makes scheduled automation via GitHub Actions unreliable.
 
-## Recommended Solution: Local Scheduling
+## How The Automation Works
 
-The most reliable approach is to run the automation on your local machine or a server with a consistent IP address.
+The script performs these steps in order:
 
-### Why Local Automation Works
+1. **Random organic delay** (10s-2min) — simulates human behavior
+2. **Login** to Naukri with configured credentials
+3. **Close overlays** — handles cookie banners, app prompts, chat widgets
+4. **Update resume headline** — alternates "Open to Work" / "Actively Looking" markers (truncated to 245 chars for Naukri's limit)
+5. **Update about section** — alternates "#OpenToWork" / "#Hiring" markers
+6. **Add random key skill** — rotates through Java, Selenium, Playwright, SQL, etc.
+7. **Upload resume** — rotates between two PDFs from `data/`
+8. **Auto-apply** — searches and Easy Applies to matching jobs
+9. **Telegram notification** — success/failure + applied companies list
 
-1. **Consistent IP Address** - Your home/office IP remains the same
-2. **Trusted Device** - Naukri recognizes your machine over time
-3. **No OTP Required** - After initial trust, logins work smoothly
-4. **Full Control** - You manage when and how it runs
+### Anti-Detection Measures
 
-### Setup Instructions
+- **Chrome** (default): CDP commands to hide `navigator.webdriver`, realistic user agent, temp user data dir, disabled automation flags
+- **Firefox** (optional via `BROWSER=firefox`): user agent override, `dom.webdriver.enabled=false`, JS injection
+- Both: random typing delays (bulk send + 10 slow chars), random organic startup delay, random pauses between job applications
 
-#### Windows Users
+## Setup Instructions
+
+### Windows Users
 
 1. **Test the script first:**
    ```cmd
    run-naukri.bat
    ```
+   Chrome will open visibly. Watch the browser work through login → profile update → resume upload → auto-apply.
 
-2. **Set up Task Scheduler:**
-   - Press `Win + R`, type `taskschd.msc`, press Enter
-   - Click "Create Basic Task" in the right panel
+2. **For scheduled runs (headless):**
+   Edit `run-naukri.bat` → set `HEADLESS=true`, then set up Task Scheduler.
+
+3. **Set up Task Scheduler:**
+   - Press `Win + R`, type `taskschd.msc`
+   - Click "Create Basic Task"
    - Name: `Naukri Resume Upload`
-   - Description: `Daily automated resume upload to Naukri.com`
-   - Trigger: Daily
-   - Start time: 8:00 AM
-   - Action: Start a program
-   - Program/script: Browse to `run-naukri.bat` in your project folder
-   - Click Finish
+   - Trigger: Daily at 6:30 AM
+   - Action: Start `run-and-sleep.bat`
+   - In Properties → Conditions → ✅ "Wake the computer to run this task"
 
-3. **Verify it works:**
+4. **Verify it works:**
    - Right-click the task → Run
    - Check the logs folder for output
 
-#### Linux/Mac Users
+### Linux/Mac Users
 
-This repository currently includes Windows batch launchers (`run-naukri.bat`, `run-and-sleep.bat`) and does not ship a maintained `run-naukri.sh`.
-
-If you want Linux/Mac scheduling, run the Java command with cron directly:
-
+Use cron directly:
 ```bash
 cd /full/path/to/Naukri
-mvn clean test >> /full/path/to/Naukri/cron.log 2>&1
+HEADLESS=true BROWSER=chrome mvn clean test >> cron.log 2>&1
 ```
 
-Then add it to `crontab -e` at your preferred schedule.
+Then add to `crontab -e` at your preferred schedule.
 
 ### Alternative: Self-Hosted GitHub Runner
 
-If you prefer using GitHub Actions, you can set up a self-hosted runner on your machine:
-
-1. **Benefits:**
-   - Uses your consistent IP address
-   - Integrates with GitHub workflow
-   - Centralized logging and monitoring
-
-2. **Setup:**
-   - Go to your GitHub repo → Settings → Actions → Runners
-   - Click "New self-hosted runner"
-   - Follow the installation instructions for your OS
-   - Uncomment the schedule in `.github/workflows/naukri-resume-upload.yml`
-
-3. **Considerations:**
-   - Your machine must be running when the schedule triggers
-   - Requires GitHub Runner service to be active
-   - More complex than simple Task Scheduler/cron
+1. Go to your GitHub repo → Settings → Actions → Runners
+2. Click "New self-hosted runner"
+3. Follow installation instructions for your OS
+4. Uncomment the schedule in `.github/workflows/naukri-resume-upload.yml`
 
 ## Troubleshooting
 
 ### Still Getting OTP Locally?
 
-If you're getting OTP even on your local machine:
-
-1. **Clear browser data:** Delete the temp Chrome user data
-2. **Use Firefox:** The local setup uses Firefox which may be more trusted
-3. **Login manually first:** Open Naukri in Firefox, login, then run the script
-4. **Check IP changes:** Ensure your ISP isn't changing your IP frequently
-5. **Wait 24 hours:** Naukri may trust your IP after consistent usage
+1. **Clear Chrome user data** — the script uses temp profiles each run
+2. **Login manually first** — open Naukri in Chrome, login, then run the script
+3. **Check IP changes** — ensure your ISP isn't changing your IP frequently
+4. **Wait 24 hours** — Naukri may trust your IP after consistent usage
 
 ### Script Fails to Run
 
-1. **Check Maven path:** Ensure Maven is in your system PATH
-2. **Check Java version:** Must be Java 17 or higher
-3. **Check Firefox:** Must be installed for local runs
+1. **Check Java version:** Must be Java 17+
+2. **Check Maven path:** Ensure Maven is in PATH or set `MAVEN_HOME`
+3. **Check Chrome:** Must be installed (Selenium Manager auto-downloads ChromeDriver)
 4. **Check credentials:** Verify config.properties has correct username/password
 5. **Check resume files:** Ensure files expected by `ResumeManager` exist in `data/`
+
+### Headline / Profile Updates Not Saving
+
+- **Character limit:** Naukri has a 250-char limit. The script auto-truncates to 245.
+- **Save button not found:** The script clicks outside the textarea first to reveal the save button, then clicks it via JavaScript.
+- **Verification passes**: Successful saves are verified by re-opening the editor and checking the persisted value.
 
 ### Logs Show Errors
 
 1. **Check logs/naukri-automation.log** for detailed error messages
 2. **Check screenshots** (*.png files) to see what the browser saw
-3. **Run manually** with `mvn clean test` to see real-time output
+3. **Run manually** with `mvn clean test` and `HEADLESS=false` to see real-time output
+
+## Job Auto-Apply
+
+The auto-apply feature:
+- Searches Naukri for SDET, Automation, Playwright, and QA roles in Bangalore
+- Finds job cards using multiple locator strategies
+- Clicks "Easy Apply" or "Apply" buttons via JavaScript
+- Handles submit steps if present
+- Applies to max **10 jobs per run**
+- **30-90 second delay** between applications to avoid rate limiting
+- Tracks applied jobs in `job_apply.properties` (no re-applies within 30 days)
+- Sends Telegram summary of applied companies
 
 ## Best Practices
 
@@ -110,22 +119,18 @@ If you're getting OTP even on your local machine:
 3. **Update resumes:** Replace PDF files when you update your resume
 4. **Test after changes:** Run manually after any code changes
 5. **Backup configuration:** Keep a copy of your config.properties
-6. **Avoid over-updating:** Once daily upload is usually enough for freshness
+6. **Avoid over-updating:** Once daily is enough for freshness signals
 
 ## Why Not Use GitHub Actions?
 
-While GitHub Actions is convenient, it's not suitable for this use case because:
-
 - ❌ Different IP on every run → OTP required
 - ❌ Can't handle OTP input automatically
-- ❌ Naukri's security measures are designed to block this
-- ❌ No reliable workaround without compromising security
+- ❌ No reliable workaround
 
-Local scheduling is the intended and supported approach for this automation.
+Local scheduling is the intended and supported approach.
 
 ## Support
 
-If you encounter issues:
 1. Check this guide first
 2. Review logs and screenshots
 3. Test manually with `mvn clean test`
@@ -133,4 +138,5 @@ If you encounter issues:
 
 ---
 
-**Remember:** This automation is meant to save you time, not bypass security. Always use your real credentials and respect Naukri's terms of service.
+**Last Updated:** 2026-05-13  
+**Version:** 2.0.0

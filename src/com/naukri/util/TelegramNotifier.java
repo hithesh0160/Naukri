@@ -68,6 +68,33 @@ public class TelegramNotifier {
         sendMessage(message);
     }
     
+    public static void sendJobApplicationSummary(List<String> appliedJobs, int total) {
+        if (!isConfigured() || appliedJobs == null || appliedJobs.isEmpty()) {
+            logger.info("No jobs applied, skipping notification");
+            return;
+        }
+
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(
+            "*Naukri Auto-Apply Summary*\n"
+            + "*Applied:* %d jobs\n"
+            + "*Time:* %s\n\n",
+            total, timestamp
+        ));
+
+        int limit = Math.min(appliedJobs.size(), 20);
+        for (int i = 0; i < limit; i++) {
+            sb.append(String.format("%d. %s\n", i + 1, appliedJobs.get(i)));
+        }
+        if (appliedJobs.size() > limit) {
+            sb.append(String.format("\n...and %d more", appliedJobs.size() - limit));
+        }
+
+        sendMessage(sb.toString());
+    }
+
     public static void sendFailureNotification(String error) {
         if (!isConfigured()) {
             logger.info("Telegram not configured, skipping notification");

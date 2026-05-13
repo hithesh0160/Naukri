@@ -23,19 +23,60 @@ public class NaukriProfilePage {
     private final By uploadResumeButton = By.xpath("//input[@class='dummyUpload typ-14Bold']");
     private final By attachCVInput = By.id("attachCV");
     
-    // About section locators
-    private final By aboutEditIcon = By.xpath("//span[contains(text(),'Profile summary')]//following::span[@class='edit icon']");
-    private final By aboutTextArea = By.xpath("//textarea[contains(@id,'profileSummary') or contains(@class,'profileSummary') or @name='summary']");
-    private final By aboutSaveButton = By.xpath("//button[contains(@class,'saveBtn') or contains(text(),'Save') or @type='submit']");
-    
-    // Alternative: Headline section locators
-    private final By headlineEditIcon = By.xpath("//span[contains(text(),'Resume headline')]//following::span[@class='edit icon']");
+    private final By aboutEditIcon = By.xpath("//span[contains(text(),'Profile summary')]/ancestor::div[contains(@class,'section') or contains(@class,'widget') or contains(@class,'field')]//span[@class='edit icon']");
+    private final By headlineEditIcon = By.xpath("//span[contains(text(),'Resume headline')]/ancestor::div[contains(@class,'section') or contains(@class,'widget') or contains(@class,'field')]//span[@class='edit icon']");
     private final By headlineTextArea = By.xpath("//textarea[@id='resumeHeadlineTxt']");
-    private final By headlineSaveButton = By.xpath("//button[contains(@class,'saveBtn') or contains(text(),'Save')]");
     
     public NaukriProfilePage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+    }
+    
+    public void closeAllOverlays() {
+        logger.info("Closing any overlays/popups");
+        try {
+            By[] closeLocators = {
+                By.xpath("//div[contains(@class,'crossIcon')]"),
+                By.xpath("//span[contains(@class,'crossIcon')]"),
+                By.xpath("//i[contains(@class,'crossIcon')]"),
+                By.xpath("//button[contains(@class,'close')]"),
+                By.xpath("//*[contains(@class,'dismiss')]"),
+                By.xpath("//*[contains(text(),'Not now')]"),
+                By.xpath("//*[contains(text(),'Not Now')]"),
+                By.xpath("//*[contains(text(),'Skip')]"),
+                By.xpath("//*[contains(text(),'Maybe later')]"),
+                By.xpath("//*[contains(@aria-label,'Close')]"),
+                By.xpath("//*[contains(@aria-label,'close')]"),
+                By.cssSelector("button[class*='close']"),
+                By.cssSelector("span[class*='close']"),
+                By.cssSelector("div[class*='close']"),
+                By.xpath("//div[@id='chatbot']//button[contains(@class,'close')]")
+            };
+            for (By locator : closeLocators) {
+                try {
+                    for (WebElement el : driver.findElements(locator)) {
+                        if (el.isDisplayed()) {
+                            try {
+                                el.click();
+                                logger.debug("Closed overlay with locator: {}", locator);
+                                Thread.sleep(500);
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+            WebElement body = driver.findElement(By.tagName("body"));
+            for (int i = 0; i < 3; i++) {
+                body.sendKeys(Keys.ESCAPE);
+                Thread.sleep(300);
+            }
+            try {
+                ((JavascriptExecutor) driver).executeScript("document.activeElement?.blur();");
+            } catch (Exception ignored) {}
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            logger.debug("Error closing overlays: {}", e.getMessage());
+        }
     }
     
     public void navigateToProfile() {
@@ -176,25 +217,7 @@ public class NaukriProfilePage {
             // Wait for profile page to be ready
             Thread.sleep(2000);
             
-            // Close any overlays or popups that might be blocking
-            try {
-                logger.info("Checking for overlays/popups to close");
-                // Try to close any modal/overlay
-                driver.findElements(By.xpath("//div[contains(@class,'crossIcon')]")).forEach(element -> {
-                    try {
-                        element.click();
-                        logger.info("Closed an overlay");
-                    } catch (Exception e) {
-                        // Ignore
-                    }
-                });
-                
-                // Try ESC key to close any popups
-                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                logger.debug("No overlays to close or already closed");
-            }
+            closeAllOverlays();
             
             // Find and click the edit icon for About section
             logger.info("Looking for About section edit button");
@@ -219,12 +242,31 @@ public class NaukriProfilePage {
             // Wait for text area to appear
             Thread.sleep(1500);
             
-            // Find the text area (using generic locator that works)
+            // Find the text area — use specific locators to avoid picking headline textarea
             logger.info("Looking for text area after clicking edit");
-            WebElement textArea = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//textarea")));
+            By[] aboutTextLocators = {
+                By.xpath("//textarea[@id='profileSummary']"),
+                By.xpath("//textarea[@name='summary']"),
+                By.xpath("//textarea[contains(@id,'summary')]"),
+                By.xpath("//span[contains(text(),'Profile summary')]/ancestor::div[contains(@class,'section')]//textarea"),
+                By.xpath("//textarea[contains(@class,'profileSummary')]"),
+                By.xpath("//form[contains(@id,'summary')]//textarea"),
+                By.xpath("//div[contains(@class,'profileSummary')]//textarea")
+            };
+            WebElement textArea = null;
+            for (By loc : aboutTextLocators) {
+                try {
+                    WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(3));
+                    textArea = shortWait.until(ExpectedConditions.presenceOfElementLocated(loc));
+                    if (textArea.isDisplayed() && !textArea.getAttribute("id").contains("resumeHeadline")) break;
+                } catch (Exception ignored) {}
+            }
             
-            if (!textArea.isDisplayed()) {
-                throw new RuntimeException("Text area found but not visible");
+            if (textArea == null) {
+                logger.warn("Could not find About textarea, skipping");
+                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                Thread.sleep(1000);
+                return;
             }
             
             // Get current text
@@ -257,6 +299,12 @@ public class NaukriProfilePage {
                 }
                 
                 logger.info("Original text (last 50 chars): ...{}", currentText.substring(Math.max(0, currentText.length() - 50)));
+                
+                // Truncate to 245 max to stay under Naukri's 250-char limit
+                if (updatedText.length() > 245) {
+                    logger.warn("Text exceeds 245 chars ({}), truncating", updatedText.length());
+                    updatedText = updatedText.substring(0, 245);
+                }
                 logger.info("Updated text (last 50 chars): ...{}", updatedText.substring(Math.max(0, updatedText.length() - 50)));
                 
                 // Clear and update the text organically
@@ -268,20 +316,50 @@ public class NaukriProfilePage {
                 // Wait a bit before saving
                 Thread.sleep(1000);
                 
-                // Click save button
+                // Click profile area to trigger save UI
+                logger.info("Triggering save by interacting outside the textarea");
+                try {
+                    org.openqa.selenium.interactions.Actions actions = new org.openqa.selenium.interactions.Actions(driver);
+                    WebElement profileSection = driver.findElement(By.xpath("//div[contains(@class,'profile')]"));
+                    actions.moveToElement(profileSection).click().perform();
+                    Thread.sleep(2000);
+                } catch (Exception e) {
+                    logger.info("Profile click failed: {}", e.getMessage());
+                }
+                
+                // Try to find and click save button
                 logger.info("Looking for Save button");
-                WebElement saveButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//button[@type='submit']")));
-                
-                // Scroll to save button
-                js.executeScript("arguments[0].scrollIntoView(true);", saveButton);
-                Thread.sleep(500);
-                
-                // Use JavaScript click (more reliable)
-                js.executeScript("arguments[0].click();", saveButton);
-                logger.info("Clicked Save button");
-                
-                // Wait for save to complete
-                Thread.sleep(3000);
+                try {
+                    By[] saveLocators = {
+                        By.xpath("//button[contains(@class,'saveBtn')]"),
+                        By.xpath("//button[contains(text(),'Save')]"),
+                        By.cssSelector("button.saveBtn"),
+                        By.xpath("//*[text()='Save']"),
+                        By.xpath("//button[@type='submit']")
+                    };
+                    WebElement saveBtn = null;
+                    for (By loc : saveLocators) {
+                        try {
+                            saveBtn = driver.findElement(loc);
+                            if (saveBtn.isDisplayed() && saveBtn.isEnabled()) { break; }
+                        } catch (Exception ignored) {}
+                    }
+                    if (saveBtn != null) {
+                        js.executeScript("arguments[0].scrollIntoView({block: 'center'});", saveBtn);
+                        Thread.sleep(300);
+                        js.executeScript("arguments[0].click();", saveBtn);
+                        logger.info("Clicked Save button");
+                        Thread.sleep(2000);
+                    } else {
+                        logger.info("No save button found, closing with ESC");
+                        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                        Thread.sleep(1500);
+                    }
+                } catch (Exception e) {
+                    logger.warn("Save attempt failed: {}", e.getMessage());
+                    driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                    Thread.sleep(1500);
+                }
                 
                 logger.info("About section update completed");
             } else {
@@ -289,16 +367,7 @@ public class NaukriProfilePage {
             }
             
         } catch (Exception e) {
-            logger.error("Failed to update About section: {}", e.getMessage());
-            logger.warn("Trying alternative: updating Resume Headline instead");
-            
-            // Try updating headline as fallback
-            try {
-                updateHeadlineSection();
-            } catch (Exception e2) {
-                logger.error("Failed to update Headline section as well: {}", e2.getMessage());
-                logger.warn("Continuing with resume upload despite profile update failure");
-            }
+            logger.warn("About section update failed (non-critical): {}", e.getMessage());
         }
     }
     
@@ -313,14 +382,7 @@ public class NaukriProfilePage {
             // Wait for profile page to be ready
             Thread.sleep(2000);
             
-            // Close any overlays
-            try {
-                logger.info("Checking for overlays/popups to close");
-                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                logger.debug("No overlays to close");
-            }
+            closeAllOverlays();
             
             // Find and click the edit icon for Headline section
             logger.info("Looking for Headline section edit button");
@@ -367,6 +429,12 @@ public class NaukriProfilePage {
                 }
                 
                 logger.info("Original text (last 50 chars): ...{}", currentText.substring(Math.max(0, currentText.length() - 50)));
+                
+                // Truncate to 245 max to stay under Naukri's 250-char limit
+                if (updatedText.length() > 245) {
+                    logger.warn("Text exceeds 245 chars ({}), truncating", updatedText.length());
+                    updatedText = updatedText.substring(0, 245);
+                }
                 logger.info("Updated text (last 50 chars): ...{}", updatedText.substring(Math.max(0, updatedText.length() - 50)));
                 
                 // Clear and update the text organically
@@ -378,28 +446,76 @@ public class NaukriProfilePage {
                 // Wait before saving
                 Thread.sleep(1000);
                 
-                // Click save button
+                // Move mouse away from textarea and click profile area to trigger save UI
+                logger.info("Triggering save by interacting outside the textarea");
+                try {
+                    org.openqa.selenium.interactions.Actions actions = new org.openqa.selenium.interactions.Actions(driver);
+                    // Click on a non-interactive area of the profile section
+                    WebElement profileSection = driver.findElement(By.xpath("//div[contains(@class,'profile')]"));
+                    actions.moveToElement(profileSection).click().perform();
+                    Thread.sleep(2000);
+                } catch (Exception e) {
+                    logger.info("Profile section click failed, trying ESC: {}", e.getMessage());
+                }
+                
+                // Try to click save with multiple locator strategies
                 logger.info("Looking for Save button");
-                WebElement saveButton = wait.until(ExpectedConditions.presenceOfElementLocated(headlineSaveButton));
+                try {
+                    By[] saveLocators = {
+                        By.xpath("//button[contains(@class,'saveBtn')]"),
+                        By.xpath("//button[contains(text(),'Save')]"),
+                        By.cssSelector("button.saveBtn"),
+                        By.xpath("//*[text()='Save']"),
+                        By.xpath("//div[contains(@class,'action')]//button"),
+                        By.id("saveHeadline"),
+                        By.xpath("//span[contains(text(),'Resume headline')]/following::button")
+                    };
+                    WebElement saveBtn = null;
+                    for (By loc : saveLocators) {
+                        try {
+                            saveBtn = driver.findElement(loc);
+                            if (saveBtn.isDisplayed() && saveBtn.isEnabled()) { break; }
+                        } catch (Exception ignored) {}
+                    }
+                    if (saveBtn != null) {
+                        js.executeScript("arguments[0].scrollIntoView({block: 'center'});", saveBtn);
+                        Thread.sleep(300);
+                        js.executeScript("arguments[0].click();", saveBtn);
+                        logger.info("Clicked Save button for Headline section");
+                        Thread.sleep(2000);
+                        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                        Thread.sleep(1000);
+                    } else {
+                        logger.info("No save button found, assuming auto-save on blur");
+                        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                        Thread.sleep(1500);
+                    }
+                } catch (Exception e) {
+                    logger.warn("Save attempt failed: {}", e.getMessage());
+                    driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                    Thread.sleep(1500);
+                }
                 
-                // Scroll and click with JavaScript
-                js.executeScript("arguments[0].scrollIntoView(true);", saveButton);
-                Thread.sleep(500);
-                js.executeScript("arguments[0].click();", saveButton);
-                logger.info("Clicked Save button for Headline section");
-                
-                // Wait for save to complete
-                Thread.sleep(3000);
+                // Check if edit mode closed
+                try {
+                    WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+                    shortWait.until(ExpectedConditions.invisibilityOfElementLocated(headlineTextArea));
+                    logger.info("Headline edit mode closed");
+                } catch (Exception e) {
+                    logger.info("Edit mode still open, sending ESC");
+                    driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+                    Thread.sleep(1500);
+                }
                 
                 // Verify the save was successful
                 logger.info("Verifying Headline was saved...");
                 driver.navigate().refresh();
                 Thread.sleep(2000);
+                closeAllOverlays();
                 
                 try {
-                    // Click edit again to verify
-                    WebElement editIconVerify = driver.findElement(headlineEditIcon);
-                    js.executeScript("arguments[0].scrollIntoView(true);", editIconVerify);
+                    WebElement editIconVerify = wait.until(ExpectedConditions.presenceOfElementLocated(headlineEditIcon));
+                    js.executeScript("arguments[0].scrollIntoView({block: 'center'});", editIconVerify);
                     Thread.sleep(500);
                     js.executeScript("arguments[0].click();", editIconVerify);
                     Thread.sleep(1500);
@@ -414,14 +530,13 @@ public class NaukriProfilePage {
                         verifyText.substring(Math.max(0, verifyText.length() - 50)));
                     
                     if (verifyText.equals(updatedText)) {
-                        logger.info("✅ Headline update VERIFIED - Change was saved successfully!");
+                        logger.info("Headline update VERIFIED - Change was saved successfully!");
                     } else {
-                        logger.warn("⚠️ Headline update NOT saved - Text reverted to original");
+                        logger.warn("Headline update NOT saved - Text reverted to original");
                         logger.warn("Expected: ...{}", updatedText.substring(Math.max(0, updatedText.length() - 50)));
                         logger.warn("Got: ...{}", verifyText.substring(Math.max(0, verifyText.length() - 50)));
                     }
                     
-                    // Close edit mode
                     driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
                     Thread.sleep(1000);
                     
@@ -446,10 +561,16 @@ public class NaukriProfilePage {
      * Helps bypass basic bot detection on text fields
      */
     private void humanLikeType(WebElement element, String text) throws InterruptedException {
+        // Send most of the text in one shot (fast), then type last few chars slow for human feel
+        if (text.length() > 10) {
+            String bulk = text.substring(0, text.length() - 10);
+            element.sendKeys(bulk);
+            Thread.sleep(500 + (long)(Math.random() * 1000));
+            text = text.substring(text.length() - 10);
+        }
         for (char c : text.toCharArray()) {
             element.sendKeys(String.valueOf(c));
-            // Random delay between 15 and 65 ms
-            Thread.sleep(15 + (long)(Math.random() * 50));
+            Thread.sleep(30 + (long)(Math.random() * 60));
         }
     }
     
@@ -463,15 +584,11 @@ public class NaukriProfilePage {
         try {
             Thread.sleep(2000);
             
-            // Close any overlays
-            try {
-                driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
-                Thread.sleep(1000);
-            } catch (Exception e) {}
+            closeAllOverlays();
             
             // Find and click the edit icon for Key Skills section
             logger.info("Looking for Key Skills section edit button");
-            By keySkillsEditIcon = By.xpath("//span[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'key skills')]//following::span[contains(@class,'edit icon')][1]");
+            By keySkillsEditIcon = By.xpath("//span[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'key skills')]/ancestor::div[contains(@class,'section') or contains(@class,'widget') or contains(@class,'field')]//span[contains(@class,'edit icon')]");
             WebElement editIcon = wait.until(ExpectedConditions.presenceOfElementLocated(keySkillsEditIcon));
             
             JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -488,8 +605,14 @@ public class NaukriProfilePage {
             By skillInputLocators[] = {
                 By.xpath("//input[contains(@placeholder, 'Enter your key skills')]"),
                 By.xpath("//input[contains(@class, 'sugInp')]"),
+                By.xpath("//input[contains(@id,'skill')]"),
                 By.id("keySkillSugg"),
-                By.xpath("//div[contains(@class,'chip-input')]//input")
+                By.xpath("//div[contains(@class,'chip-input')]//input"),
+                By.xpath("//div[contains(@class,'skill')]//input"),
+                By.cssSelector("input[placeholder*='skill' i]"),
+                By.xpath("//input[contains(@placeholder, 'skill')]"),
+                By.xpath("//span[contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'key skills')]//following::input"),
+                By.xpath("//input[@type='text' and contains(@class,'input')]")
             };
             
             WebElement skillInput = null;
@@ -498,6 +621,21 @@ public class NaukriProfilePage {
                     skillInput = driver.findElement(locator);
                     if (skillInput.isDisplayed()) {
                         break;
+                    }
+                } catch (Exception e) {}
+            }
+            
+            // If still not found, try waiting for the input to appear
+            if (skillInput == null) {
+                try {
+                    logger.info("Key Skills input not found immediately, waiting...");
+                    Thread.sleep(3000);
+                    WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+                    for (By locator : skillInputLocators) {
+                        try {
+                            skillInput = shortWait.until(ExpectedConditions.presenceOfElementLocated(locator));
+                            if (skillInput.isDisplayed()) break;
+                        } catch (Exception e) {}
                     }
                 } catch (Exception e) {}
             }
@@ -542,7 +680,7 @@ public class NaukriProfilePage {
                     js.executeScript("arguments[0].click();", saveButton);
                     logger.info("Clicked Save button for Key Skills section");
                     Thread.sleep(3000);
-                    logger.info("✅ Key Skills update completed successfully");
+                    logger.info("Key Skills update completed successfully");
                 } else {
                     logger.warn("Could not find Save button for Key Skills");
                     driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);

@@ -15,7 +15,10 @@ set MAVEN_HOME=D:\hites\Downloads\apache-maven-3.9.12-bin\apache-maven-3.9.12
 set PATH=%MAVEN_HOME%\bin;%PATH%
 
 REM Set headless mode (set to "false" to see browser, "true" for headless)
-set HEADLESS=true
+set HEADLESS=false
+
+REM Set browser: "chrome" (default, better anti-detection) or "firefox"
+set BROWSER=chrome
 
 REM Set Telegram credentials (optional - leave empty to disable notifications)
 REM Get your bot token from @BotFather on Telegram
