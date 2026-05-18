@@ -107,7 +107,7 @@ The auto-apply feature:
 - Finds job cards using multiple locator strategies
 - Clicks "Easy Apply" or "Apply" buttons via JavaScript
 - Handles submit steps if present
-- Applies to max **10 jobs per run**
+- Applies to max **5 jobs per run**
 - **30-90 second delay** between applications to avoid rate limiting
 - Tracks applied jobs in `job_apply.properties` (no re-applies within 30 days)
 - Sends Telegram summary of applied companies

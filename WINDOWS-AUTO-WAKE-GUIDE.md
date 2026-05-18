@@ -54,8 +54,8 @@ Register-ScheduledTask -TaskName "Naukri Resume Upload" -Description "Daily Nauk
 | 6:31 AM | Login to Naukri |
 | 6:32 AM | Update profile sections |
 | 6:33 AM | Upload resume |
-| 6:34 AM | Auto-apply to jobs (~10 per keyword) |
-| 6:45 AM | PC goes back to sleep |
+| 6:34 AM | Auto-apply to jobs (~5 per keyword) |
+| 6:40 AM | PC goes back to sleep |
 
 ---
 

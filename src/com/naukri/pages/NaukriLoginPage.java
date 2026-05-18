@@ -17,11 +17,24 @@ public class NaukriLoginPage {
     private final WebDriver driver;
     private final WebDriverWait wait;
     
-    // Locators
+    // Locators - Updated based on MCP/Playwright inspection of current Naukri login page
+    // Key finding: The login page URL changed from login.naukri.com/nLogin/Login.php to www.naukri.com/nlogin/login
+    // Key finding: There are NO label elements on the page anymore - labels were completely removed
     private final By loginLink = By.cssSelector("a[href*='login'], a.nI-gNb-lg-rg__login, a#login_Layer");
-    private final By emailInput = By.xpath("//label[text()='Email ID / Username']/../input");
-    private final By passwordInput = By.xpath("//input[@type='password']");
+    
+    // Email field found via Playwright inspection: <input type="text" id="usernameField" placeholder="Enter Email ID / Username">
+    private final By emailInput = By.id("usernameField");
+    private final By emailInputByPlaceholder = By.cssSelector("input[placeholder='Enter Email ID / Username']");
+    
+    // Password field found via Playwright inspection: <input type="password" id="passwordField" placeholder="Enter Password">
+    private final By passwordInput = By.id("passwordField");
+    
+    // Login button: <button type="submit" class="...">Login</button>
     private final By loginButton = By.xpath("//button[text()='Login']");
+    
+    // OTP button alternative: <button type="submit">Use OTP to Login</button>
+    private final By otpLoginButton = By.xpath("//button[contains(text(),'OTP')]");
+    
     private final By googleIframe = By.cssSelector("iframe[src*='accounts.google.com']");
     
     public NaukriLoginPage(WebDriver driver) {
@@ -30,8 +43,9 @@ public class NaukriLoginPage {
     }
     
     public void navigateToNaukri() {
-        logger.info("Navigating to Naukri.com");
-        driver.get("https://www.naukri.com");
+        logger.info("Navigating to Naukri login page");
+        // Navigate to the correct current login URL (changed from login.naukri.com/nLogin/Login.php)
+        driver.get("https://www.naukri.com/nlogin/login");
     }
     
     public void clickLoginLink() {
@@ -72,20 +86,50 @@ public class NaukriLoginPage {
     
     public void enterEmail(String email) {
         logger.info("Entering email: {}", email);
-        WebElement emailElement = wait.until(ExpectedConditions.visibilityOfElementLocated(emailInput));
-        emailElement.clear();
         
-        // Fast typing for login (commented slow typing)
+        // Check if we're already on the direct login page (URL contains nlogin/login)
+        String currentUrl = driver.getCurrentUrl();
+        if (currentUrl.contains("nlogin") || currentUrl.contains("login")) {
+            logger.info("Already on login page form: {}", currentUrl);
+        }
+        
+        // Try id-based locator first (more reliable), fallback to placeholder
+        WebElement emailElement = null;
+        try {
+            emailElement = wait.until(ExpectedConditions.visibilityOfElementLocated(emailInput));
+        } catch (Exception e) {
+            logger.warn("Could not find email field by id, trying placeholder locator: {}", e.getMessage());
+            try {
+                emailElement = wait.until(ExpectedConditions.visibilityOfElementLocated(emailInputByPlaceholder));
+            } catch (Exception e2) {
+                logger.warn("Could not find by placeholder either, trying generic text input: {}", e2.getMessage());
+                // Last resort: find the first visible text input that's not the search bar
+                java.util.List<WebElement> textInputs = driver.findElements(By.cssSelector("input[type='text']"));
+                for (WebElement input : textInputs) {
+                    if (input.isDisplayed() && !input.getAttribute("placeholder").contains("keyword")
+                        && !input.getAttribute("placeholder").contains("location")) {
+                        emailElement = input;
+                        break;
+                    }
+                }
+                if (emailElement == null) {
+                    // Fall back to the first text input
+                    emailElement = driver.findElements(By.cssSelector("input[type='text']")).get(0);
+                }
+            }
+        }
+        
+        emailElement.clear();
         emailElement.sendKeys(email);
+        logger.info("Email entered successfully");
     }
     
     public void enterPassword(String password) {
         logger.info("Entering password");
         WebElement passwordElement = wait.until(ExpectedConditions.visibilityOfElementLocated(passwordInput));
         passwordElement.clear();
-        
-        // Fast typing for login (commented slow typing)
         passwordElement.sendKeys(password);
+        logger.info("Password entered successfully");
     }
     
     public void clickLoginButton() {
@@ -99,7 +143,15 @@ public class NaukriLoginPage {
         }
         
         WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(loginButton));
-        loginBtn.click();
+        
+        try {
+            loginBtn.click();
+            logger.info("Login button clicked successfully");
+        } catch (Exception e) {
+            logger.warn("Regular click failed, trying JavaScript click");
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", loginBtn);
+            logger.info("Login button clicked using JavaScript");
+        }
     }
     
     public void login(String username, String password) {
@@ -112,13 +164,19 @@ public class NaukriLoginPage {
             Thread.currentThread().interrupt();
         }
         
-        clickLoginLink();
+        // Check if the page already has the login form visible (new URL has form directly)
+        String currentUrl = driver.getCurrentUrl();
+        logger.info("Current URL: {}", currentUrl);
         
-        // Add delay after clicking login link
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        // If we're on the main naukri.com page (not login page), click the login link
+        if (currentUrl.contains("naukri.com") && !currentUrl.contains("nlogin") && !currentUrl.contains("login")) {
+            logger.info("On main Naukri page, clicking login link");
+            try {
+                clickLoginLink();
+                Thread.sleep(2000);
+            } catch (Exception e) {
+                logger.warn("Could not click login link: {}", e.getMessage());
+            }
         }
         
         enterEmail(username);

@@ -54,7 +54,7 @@ The reliable setup is **local execution on a consistent IP** (Windows Task Sched
 After profile update + resume upload, the script searches Naukri for:
 - `SDET Java`, `Automation Testing Selenium`, `Playwright`, `QA Automation`
 
-Applies to up to **10 jobs per run** with random delays (30-90s) to avoid detection. Applied jobs are tracked in `job_apply.properties` to prevent re-application within 30 days.
+Applies to up to **5 jobs per run** with random delays (30-90s) to avoid detection. Applied jobs are tracked in `job_apply.properties` to prevent re-application within 30 days.
 
 ## Configuration Priority
 

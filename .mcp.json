@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "C:\\Program Files\\nodejs\\npx.cmd",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--browser=chrome",
+        "--caps=vision,pdf,devtools",
+        "--viewport-size=1920x1080"
+      ]
+    }
+  }
+}
