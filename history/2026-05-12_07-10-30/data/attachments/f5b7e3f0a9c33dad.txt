@@ -1,1 +1,0 @@
-atr_normalized: 0.031491

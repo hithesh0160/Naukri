@@ -1,1 +1,0 @@
-Returned fields: ['trend_direction', 'trend_strength', 'rsi', 'atr_normalized', 'rsi_zone', 'macd', 'macd_signal', 'macd_histogram', 'stochastic_k', 'stochastic_d', 'momentum', 'bb_position', 'volatility_pct', 'volume_trend', 'volume_spike', 'mean_reversion_score', 'price_distance_ma', 'price_action_strength', 'ema_crossover']
