@@ -1,0 +1,64 @@
+{
+  "ranked_trades": [
+    {
+      "stock": "INFY",
+      "probability": 79.76,
+      "entry": 1194.0,
+      "target": 1204.86,
+      "stop_loss": 1190.38,
+      "expected_profit": 10.86,
+      "expected_profit_pct": 0.91,
+      "risk_reward_ratio": 3.00000000000009,
+      "setup_score": 96.7,
+      "recommendation": "BUY",
+      "analysis": "INFY - 79.8% probability"
+    },
+    {
+      "stock": "COALINDIA",
+      "probability": 79.66,
+      "entry": 456.95,
+      "target": 460.74,
+      "stop_loss": 455.69,
+      "expected_profit": 11.37,
+      "expected_profit_pct": 0.83,
+      "risk_reward_ratio": 9.023809523809588,
+      "setup_score": 98.18,
+      "recommendation": "BUY",
+      "analysis": "COALINDIA - 79.7% probability"
+    },
+    {
+      "stock": "VEDL",
+      "probability": 73.85,
+      "entry": 336.05,
+      "target": 340.72,
+      "stop_loss": 334.49,
+      "expected_profit": 18.68,
+      "expected_profit_pct": 1.39,
+      "risk_reward_ratio": 11.974358974358957,
+      "setup_score": 95.0,
+      "recommendation": "CONSIDER",
+      "analysis": "VEDL - 73.8% probability"
+    }
+  ],
+  "top_recommendation": {
+    "stock": "INFY",
+    "probability": 79.76,
+    "entry": 1194.0,
+    "target": 1204.86,
+    "stop_loss": 1190.38,
+    "expected_profit": 10.86,
+    "expected_profit_pct": 0.91,
+    "risk_reward_ratio": 3.00000000000009,
+    "setup_score": 96.7,
+    "recommendation": "BUY",
+    "analysis": "INFY - 79.8% probability"
+  },
+  "risk_analysis": "Fallback analysis (LLM unavailable)",
+  "portfolio_strategy": "Allocate capital equally among top 3 trades",
+  "warnings": [
+    "LLM analysis unavailable () - using basic ranking"
+  ],
+  "explanation": "Trades ranked by probability. Top recommendation has highest probability.",
+  "provider_used": "",
+  "status": "fallback"
+}
