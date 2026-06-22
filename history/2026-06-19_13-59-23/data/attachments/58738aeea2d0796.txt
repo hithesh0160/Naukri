@@ -1,1 +1,0 @@
-INFO     app.services.paper_trading_service:paper_trading_service.py:558 Skipping RELIANCE: risk controls paused new trades (3 consecutive losses)
