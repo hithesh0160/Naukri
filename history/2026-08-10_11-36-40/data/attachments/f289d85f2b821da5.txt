@@ -1,0 +1,3 @@
+Entry: ₹100, Target: ₹105 → Profit: ₹5
+Entry: ₹1000, Target: ₹1050 → Profit: ₹50
+Entry: ₹500, Target: ₹475 → Profit: ₹-25
