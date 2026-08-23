@@ -65,6 +65,7 @@ Applies to up to **5 jobs per run** with random delays (30-90s) to avoid detecti
 
 - Setup and reliability notes: `AUTOMATION-GUIDE.md`
 - Windows wake/schedule instructions: `WINDOWS-AUTO-WAKE-GUIDE.md`
+- **Android/Termux setup**: `TERMUX-ANDROID-SETUP.md`
 - Telegram setup: `TELEGRAM-SETUP.md`
 - Security checklist: `SECURITY.md`
 
