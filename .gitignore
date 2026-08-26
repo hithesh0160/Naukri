@@ -26,6 +26,7 @@ cron.log
 .vscode/
 .idea/
 *.iml
+.playwright-mcp/
 
 # OS files
 .DS_Store
@@ -39,3 +40,4 @@ Thumbs.db
 
 # JAR files (using Maven)
 *.jar
+jar/
