@@ -24,15 +24,13 @@ public class NaukriJobApplyPage {
     private static final String STATE_FILE = "src/com/naukri/config/job_apply.properties";
     private static final int MAX_APPLICATIONS_PER_RUN = 5;
     private static final int MAX_JOBS_TO_SCAN_PER_KEYWORD = 20;
-    private static final String[] EXCLUDED_COMPANIES = {
-        "Wipro",
-        "WIPRO",
-        "wipro"
-    };
+
+    private final Set<String> excludedCompanies;
 
     public NaukriJobApplyPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        this.excludedCompanies = loadExcludedCompanies();
     }
 
     public List<String> searchAndApply(String keyword, String location) {
@@ -452,13 +450,33 @@ public class NaukriJobApplyPage {
         }
     }
 
+    private Set<String> loadExcludedCompanies() {
+        Set<String> companies = new HashSet<>();
+        try {
+            String excludedList = ConfigUtil.getConfig("EXCLUDED_COMPANIES", "excluded.companies");
+            if (excludedList != null && !excludedList.trim().isEmpty()) {
+                String[] parts = excludedList.split(",");
+                for (String part : parts) {
+                    String trimmed = part.trim();
+                    if (!trimmed.isEmpty()) {
+                        companies.add(trimmed.toLowerCase(Locale.ROOT));
+                    }
+                }
+                logger.info("Loaded {} excluded companies from config", companies.size());
+            }
+        } catch (Exception e) {
+            logger.debug("Could not load excluded companies from config: {}", e.getMessage());
+        }
+        return companies;
+    }
+
     private boolean isExcludedCompany(String company) {
-        if (company == null || company.trim().isEmpty()) {
+        if (company == null || company.trim().isEmpty() || excludedCompanies.isEmpty()) {
             return false;
         }
         String normalizedCompany = company.trim().toLowerCase(Locale.ROOT);
-        for (String excluded : EXCLUDED_COMPANIES) {
-            if (normalizedCompany.contains(excluded.toLowerCase(Locale.ROOT))) {
+        for (String excluded : excludedCompanies) {
+            if (normalizedCompany.contains(excluded)) {
                 return true;
             }
         }

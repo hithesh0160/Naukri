@@ -56,6 +56,17 @@ After profile update + resume upload, the script searches Naukri for:
 
 Applies to up to **5 jobs per run** with random delays (30-90s) to avoid detection. Applied jobs are tracked in `job_apply.properties` to prevent re-application within 30 days.
 
+### Company Exclusion
+
+You can exclude specific companies from job applications by setting `excluded.companies` in `config.properties`:
+
+```properties
+# Exclude companies (comma-separated, case-insensitive)
+excluded.companies=Wipro,Infosys,TCS
+```
+
+This is useful to avoid applying to your current employer or companies you don't want to work with.
+
 ## Configuration Priority
 
 1. `config.properties`

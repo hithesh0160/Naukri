@@ -3,6 +3,11 @@
 username=your_email@example.com
 password=your_password
 
+# Company Exclusion List (optional)
+# Comma-separated list of company names to exclude from job applications
+# Case-insensitive matching (e.g., "Wipro" will match "wipro", "WIPRO", etc.)
+excluded.companies=Wipro
+
 # Telegram Notification Settings (optional)
 # Get bot token from @BotFather on Telegram
 # Get chat ID from @userinfobot on Telegram
