@@ -24,6 +24,11 @@ public class NaukriJobApplyPage {
     private static final String STATE_FILE = "src/com/naukri/config/job_apply.properties";
     private static final int MAX_APPLICATIONS_PER_RUN = 5;
     private static final int MAX_JOBS_TO_SCAN_PER_KEYWORD = 20;
+    private static final String[] EXCLUDED_COMPANIES = {
+        "Wipro",
+        "WIPRO",
+        "wipro"
+    };
 
     public NaukriJobApplyPage(WebDriver driver) {
         this.driver = driver;
@@ -56,6 +61,11 @@ public class NaukriJobApplyPage {
 
                     if (isAlreadyApplied(appliedJobs, job.id)) {
                         logger.info("Skipping already applied job: {} at {}", job.title, job.company);
+                        continue;
+                    }
+
+                    if (isExcludedCompany(job.company)) {
+                        logger.info("Skipping excluded company job: {} at {}", job.title, job.company);
                         continue;
                     }
 
@@ -440,6 +450,19 @@ public class NaukriJobApplyPage {
         } catch (Exception e) {
             return true;
         }
+    }
+
+    private boolean isExcludedCompany(String company) {
+        if (company == null || company.trim().isEmpty()) {
+            return false;
+        }
+        String normalizedCompany = company.trim().toLowerCase(Locale.ROOT);
+        for (String excluded : EXCLUDED_COMPANIES) {
+            if (normalizedCompany.contains(excluded.toLowerCase(Locale.ROOT))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void markApplied(Properties props, String jobId, String title, String company) {
