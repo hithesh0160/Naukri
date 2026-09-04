@@ -23,9 +23,18 @@ public class DriverManager {
         String ciEnv = System.getenv("CI");
         boolean isCI = "true".equalsIgnoreCase(ciEnv);
         
+        // Check if running on Android/Termux
+        String osArch = System.getProperty("os.arch");
+        boolean isAndroid = "aarch64".equalsIgnoreCase(osArch) || System.getProperty("os.name").toLowerCase().contains("android");
+        
         if (isCI) {
             logger.info("CI environment detected - using Chrome");
             return createChrome();
+        }
+        
+        if (isAndroid) {
+            logger.info("Android/Termux environment detected - using Firefox (more stable)");
+            return createFirefox();
         }
         
         // Local: use BROWSER env var to choose, default to Chrome (better anti-detection)
