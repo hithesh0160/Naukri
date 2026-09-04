@@ -20,7 +20,7 @@ export HEADLESS=true
 export BROWSER=chrome
 
 # Set ChromeDriver path for Termux
-export CHROME_DRIVER_PATH=/data/data/com.termux/files/usr/bin/chromedriver
+export CHROME_DRIVER_PATH=$PREFIX/bin/chromedriver
 
 # Verify Java is available
 echo "Checking Java installation..."
