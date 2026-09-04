@@ -50,8 +50,15 @@ fi
 echo ""
 echo "Running tests in headless mode..."
 
-# Run Maven test
-mvn clean test
+# Run Maven test with 20-minute timeout
+timeout 1200 mvn clean test || {
+    echo "ERROR: Script timed out after 20 minutes"
+    echo "Killing all processes..."
+    pkill -9 java
+    pkill -9 firefox
+    pkill -9 geckodriver
+    exit 1
+}
 
 echo ""
 echo "========================================"
