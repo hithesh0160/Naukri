@@ -190,8 +190,6 @@ public class DriverManager {
         }
         
         FirefoxOptions options = new FirefoxOptions();
-        options.addArguments("--width=1920");
-        options.addArguments("--height=1080");
         
         // Check if headless mode is requested via environment variable
         String headlessMode = System.getenv("HEADLESS");
@@ -204,33 +202,16 @@ public class DriverManager {
             logger.info("Firefox running in VISIBLE mode");
         }
         
-        // Anti-detection: set a realistic user agent for Windows
-        options.addPreference("general.useragent.override", 
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0");
-        
-        // Disable automation flags
+        // Minimal options for Android/Termux stability
         options.addPreference("dom.webdriver.enabled", false);
         options.addPreference("useAutomationExtension", false);
         options.addPreference("dom.webnotifications.enabled", false);
-        options.addPreference("dom.push.enabled", false);
-        
-        // Disable password manager prompts
         options.addPreference("signon.rememberSignons", false);
-        options.addPreference("signon.autofillForms", false);
-        
-        // Make Firefox appear less like automation
-        options.addPreference("privacy.trackingprotection.enabled", true);
-        options.addPreference("media.autoplay.default", 0);
         
         options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
         
         FirefoxDriver driver = new FirefoxDriver(options);
         driver.manage().window().maximize();
-        
-        // Hide automation indicators via JS if visible mode
-        if (!isHeadless) {
-            driver.executeScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
-        }
         
         logger.info("Firefox WebDriver created successfully");
         
