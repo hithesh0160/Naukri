@@ -20,8 +20,8 @@ fi
 # Set display for VNC
 export DISPLAY=:1
 
-# Set headless mode to true for Android (no visible browser)
-export HEADLESS=true
+# Set headless mode to false for Android (Firefox headless crashes on Android)
+export HEADLESS=false
 
 # Set browser to firefox (more stable on Termux than chromium)
 export BROWSER=firefox
