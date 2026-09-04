@@ -10,7 +10,14 @@ echo ""
 # Change to script directory
 cd "$(dirname "$0")" || exit 1
 
-# Set display for VNC (if not already set)
+# Start VNC server if not running
+if ! pgrep -x "Xvnc" > /dev/null; then
+    echo "Starting VNC server..."
+    vncserver -localhost :1
+    sleep 2
+fi
+
+# Set display for VNC
 export DISPLAY=:1
 
 # Set headless mode to true for Android (no visible browser)

@@ -61,6 +61,21 @@ public class DriverManager {
         options.addArguments("--disable-gpu");
         options.addArguments("--remote-allow-origins=*");
         
+        // Android/Termux specific arguments for Chromium
+        options.addArguments("--disable-software-rasterizer");
+        options.addArguments("--disable-extensions");
+        options.addArguments("--disable-background-networking");
+        options.addArguments("--disable-default-apps");
+        options.addArguments("--disable-sync");
+        options.addArguments("--disable-translate");
+        options.addArguments("--hide-scrollbars");
+        options.addArguments("--metrics-recording-only");
+        options.addArguments("--mute-audio");
+        options.addArguments("--no-first-run");
+        options.addArguments("--safebrowsing-disable-auto-update");
+        options.addArguments("--ignore-certificate-errors");
+        options.addArguments("--disable-logging");
+        
         // Respect HEADLESS env variable (default to headless for CI)
         String headlessMode = System.getenv("HEADLESS");
         boolean isHeadless = !"false".equalsIgnoreCase(headlessMode);
