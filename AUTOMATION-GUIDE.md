@@ -64,6 +64,28 @@ HEADLESS=true BROWSER=chrome mvn clean test >> cron.log 2>&1
 
 Then add to `crontab -e` at your preferred schedule.
 
+### Android/Termux Users
+
+For Android devices, use Termux with Firefox (more stable than Chrome on Android):
+
+1. **Install Termux from F-Droid** (NOT Google Play)
+2. **Install required packages:**
+   ```bash
+   pkg install openjdk-17 maven git termux-boot firefox tigervnc
+   ```
+3. **Install geckodriver:**
+   ```bash
+   wget https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
+   tar -xzf geckodriver-v0.34.0-linux64.tar.gz
+   mv geckodriver $PREFIX/bin/
+   chmod +x $PREFIX/bin/geckodriver
+   ```
+4. **Setup VNC server** (required for Firefox display on Android)
+5. **Configure scheduling** - Samsung Routines + Termux:Boot is recommended for Samsung devices
+6. **Disable battery optimization** for Termux in Android settings
+
+**Important:** Android setup has limitations - see `TERMUX-ANDROID-SETUP.md` for detailed instructions.
+
 ### Alternative: Self-Hosted GitHub Runner
 
 1. Go to your GitHub repo → Settings → Actions → Runners

@@ -17,12 +17,14 @@ This guide explains how to run the Naukri resume upload automation on Android us
 1. **Android device** running Android 7.0+ (64-bit recommended)
 2. **Termux app** from F-Droid (NOT Google Play version)
    - Download: https://f-droid.org/en/packages/com.termux/
-3. **Termux:API** from F-Droid (for scheduling)
+3. **Termux:Boot** from F-Droid (for auto-start on boot)
+   - Download: https://f-droid.org/en/packages/com.termux.boot/
+4. **Termux:API** from F-Droid (optional, for alternative scheduling)
    - Download: https://f-droid.org/en/packages/com.termux.api/
-4. **VNC Viewer** (optional, for debugging)
+5. **VNC Viewer** (optional, for debugging)
    - Download from Google Play Store
-5. **At least 2GB free storage**
-6. **Stable WiFi connection** (to maintain consistent IP)
+6. **At least 2GB free storage**
+7. **Stable WiFi connection** (to maintain consistent IP)
 
 ## Step-by-Step Setup
 
@@ -47,27 +49,29 @@ pkg install maven
 # Install Git (to clone repository)
 pkg install git
 
-# Install Termux:API (for scheduling)
-pkg install termux-api
+# Install Termux:Boot (for auto-start on boot)
+pkg install termux-boot
 
-# Install Chromium browser
-pkg install x11-repo
-pkg install chromium
+# Install Firefox browser (more stable on Android than Chrome)
+pkg install firefox
 
-# Install VNC server (for display)
+# Install geckodriver (Firefox driver)
+wget https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
+tar -xzf geckodriver-v0.34.0-linux64.tar.gz
+mv geckodriver $PREFIX/bin/
+chmod +x $PREFIX/bin/geckodriver
+
+# Install VNC server (for display - required for Firefox)
 pkg install tigervnc
-
-# Install cronie (alternative scheduling)
-pkg install cronie
 ```
 
-### 3. Setup VNC Server (Required for Browser)
+### 3. Setup VNC Server (Required for Firefox)
 
-Selenium needs a display to run Chrome:
+Firefox needs a display to run on Android:
 
 ```bash
 # Start VNC server
-vncserver -localhost
+vncserver -localhost :1
 
 # Password will be prompted - set a secure password
 # View-only password: n
@@ -126,9 +130,49 @@ Watch the output for errors. If successful, you'll see:
 
 ### 7. Setup Scheduled Execution
 
-You have two options:
+You have three options:
 
-#### Option A: Using termux-job-scheduler (Recommended)
+#### Option A: Samsung Routines + Termux:Boot (Recommended for Samsung devices)
+
+This is the most reliable method for Samsung devices as it uses the built-in Routines feature.
+
+1. **Create Termux:Boot startup script:**
+
+```bash
+mkdir -p ~/.termux/boot
+nano ~/.termux/boot/naukri-automation.sh
+```
+
+Add this content:
+```bash
+#!/data/data/com.termux/files/usr/bin/bash
+# Start VNC server
+vncserver -localhost :1
+export DISPLAY=:1
+
+# Wait for VNC to start
+sleep 2
+
+# Run Naukri automation
+cd ~/Naukri
+./run-naukri-termux.sh
+```
+
+Make executable:
+```bash
+chmod +x ~/.termux/boot/naukri-automation.sh
+```
+
+2. **Create Samsung Routine:**
+   - Open **Samsung Routines** (Modes and Routines app)
+   - Create new routine
+   - **If:** Time = 6:30 AM (or your desired time)
+   - **Then:** Open app = Termux
+   - Save
+
+The routine will launch Termux at the scheduled time, and Termux:Boot will auto-run the automation script.
+
+#### Option B: Using termux-job-scheduler
 
 ```bash
 # Run the scheduler setup script
@@ -140,15 +184,17 @@ This creates a job that runs every 24 hours.
 
 **Verify scheduled job:**
 ```bash
-termux-job-scheduler --list
+termux-job-scheduler '-list'
 ```
 
 **Cancel scheduled job:**
 ```bash
-termux-job-scheduler --cancel --job-id 1001
+termux-job-scheduler '-cancel' '-job-id' 1001
 ```
 
-#### Option B: Using Cron
+**Note:** Termux must be running in background for this to work reliably.
+
+#### Option C: Using Cron
 
 ```bash
 # Run the cron setup script
@@ -169,6 +215,8 @@ crontab -l
 echo 'crond' >> ~/.bashrc
 ```
 
+**Note:** Cron requires Termux to be running in background.
+
 ### 8. Configure Android Battery Optimization
 
 **Critical**: Prevent Android from killing Termux:
@@ -182,7 +230,11 @@ echo 'crond' >> ~/.bashrc
 
 ### 9. Keep Termux Alive
 
-#### Method 1: Termux:Boot (Install from F-Droid)
+#### Method 1: Samsung Routines (Recommended for Samsung)
+
+As configured in Option A above, Samsung Routines will automatically launch Termux at the scheduled time. No additional setup needed.
+
+#### Method 2: Termux:Boot (For non-Samsung devices)
 
 1. Install **Termux:Boot** from F-Droid
 2. Create startup script:
@@ -196,16 +248,8 @@ Add:
 ```bash
 #!/data/data/com.termux/files/usr/bin/bash
 # Start VNC
-vncserver -localhost
+vncserver -localhost :1
 export DISPLAY=:1
-
-# Start cron
-crond
-```
-
-3. Make executable:
-```bash
-chmod +x ~/.termux/boot/start-services.sh
 ```
 
 #### Method 2: Termux:Widget (Manual trigger)
@@ -240,24 +284,40 @@ cat src/com/naukri/config/last_resume_uploaded.properties
 
 ## Troubleshooting
 
-### Chrome/Chromium Issues
+### Firefox Issues
 
-If Selenium can't find Chrome:
+If Selenium can't find Firefox:
 
 ```bash
-# Check if chromium is installed
-which chromium-browser
+# Check if firefox is installed
+which firefox
 
 # If not found, install again
-pkg install chromium
+pkg install firefox
 ```
 
-### Out of Memory Errors
-
+If geckodriver is missing:
 ```bash
-# Increase Java heap size
-export MAVEN_OPTS="-Xmx512m"
-./run-naukri-termux.sh
+# Check if geckodriver is installed
+geckodriver --version
+
+# If not found, install again
+wget https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
+tar -xzf geckodriver-v0.34.0-linux64.tar.gz
+mv geckodriver $PREFIX/bin/
+chmod +x $PREFIX/bin/geckodriver
+```
+
+### Firefox Headless Crashes
+
+Firefox headless mode crashes on Android due to graphics issues. The script uses visible mode with VNC display instead.
+
+If you still have issues:
+```bash
+# Restart VNC
+vncserver -kill :*
+vncserver -localhost :1
+export DISPLAY=:1
 ```
 
 ### VNC Connection Issues
@@ -273,20 +333,31 @@ export DISPLAY=:1
 
 ### Job Not Running Automatically
 
-1. Check if Termux is being killed:
-   - Disable battery optimization (see Step 8)
-   - Keep Termux in recent apps
-   
-2. Check if scheduler is working:
-   ```bash
-   # For termux-job-scheduler
-   termux-job-scheduler --list
-   
-   # For cron
-   ps aux | grep cron
-   ```
+1. **For Samsung Routines:**
+   - Verify the routine is active in Samsung Routines app
+   - Check if Termux launches at the scheduled time
+   - Verify Termux:Boot script is executable
 
-3. Check logs for errors:
+2. **For termux-job-scheduler:**
+   - Check if Termux is being killed:
+     - Disable battery optimization (see Step 8)
+     - Keep Termux in recent apps
+   - Check if scheduler is working:
+     ```bash
+     termux-job-scheduler '-list'
+     ```
+
+3. **For cron:**
+   - Check if cron daemon is running:
+     ```bash
+     ps aux | grep cron
+     ```
+   - Check cron job:
+     ```bash
+     crontab -l
+     ```
+
+4. Check logs for errors:
    ```bash
    cat cron.log
    tail -f logs/naukri-automation.log
@@ -313,6 +384,9 @@ Mobile IPs change frequently, causing OTP prompts:
 ├── data/                        # Resume PDF files
 ├── src/                         # Source code
 └── *.png                        # Screenshots
+
+~/.termux/boot/
+└── naukri-automation.sh        # Auto-start script for Termux:Boot
 ```
 
 ## Best Practices
@@ -324,6 +398,9 @@ Mobile IPs change frequently, causing OTP prompts:
 5. **Check logs** weekly for failures
 6. **Restart phone** weekly to prevent memory issues
 7. **Keep phone plugged in** during scheduled run time if possible
+8. **Use Samsung Routines** if you have a Samsung device (most reliable)
+9. **Use stable WiFi** to avoid IP changes and OTP issues
+10. **Script timeout** is set to 10 minutes - adjust if needed
 
 ## Alternative: Termux on Tablet/Old Phone
 
@@ -377,6 +454,8 @@ pkg uninstall openjdk-17 maven chromium tigervnc cronie
 
 ---
 
-**Last Updated**: 2026-08-23  
-**Version**: 1.0.0  
-**Tested On**: Termux 0.118.0, Android 12+
+**Last Updated**: 2026-09-04  
+**Version**: 2.0.0  
+**Tested On**: Termux 0.119.0, Android 12+
+**Browser**: Firefox (more stable than Chrome on Android)
+**Scheduling**: Samsung Routines + Termux:Boot (recommended)

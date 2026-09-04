@@ -76,7 +76,8 @@ This is useful to avoid applying to your current employer or companies you don't
 
 - Setup and reliability notes: `AUTOMATION-GUIDE.md`
 - Windows wake/schedule instructions: `WINDOWS-AUTO-WAKE-GUIDE.md`
-- **Android/Termux setup**: `TERMUX-ANDROID-SETUP.md`
+- **Android/Termux setup**: `TERMUX-ANDROID-SETUP.md` (includes Samsung Routines scheduling)
+- **Termux quick start**: `TERMUX-QUICKSTART.md`
 - Telegram setup: `TELEGRAM-SETUP.md`
 - Security checklist: `SECURITY.md`
 

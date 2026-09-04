@@ -7,27 +7,34 @@ Quick reference for running Naukri automation on Android/Termux.
 ```bash
 # 1. Install packages
 pkg update && pkg upgrade
-pkg install openjdk-17 maven git termux-api x11-repo chromium tigervnc cronie
+pkg install openjdk-17 maven git termux-boot firefox tigervnc
 
-# 2. Setup VNC
-vncserver -localhost
+# 2. Install geckodriver
+wget https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
+tar -xzf geckodriver-v0.34.0-linux64.tar.gz
+mv geckodriver $PREFIX/bin/
+chmod +x $PREFIX/bin/geckodriver
+
+# 3. Setup VNC
+vncserver -localhost :1
 echo 'export DISPLAY=:1' >> ~/.bashrc
 source ~/.bashrc
 
-# 3. Clone repo
-cd ~ && git clone YOUR_REPO_URL
+# 4. Clone repo
+cd ~ && git clone https://github.com/hithesh0160/Naukri.git
 cd Naukri
 
-# 4. Configure credentials
+# 5. Configure credentials
 nano src/com/naukri/config/config.properties
 # Add: username, password, telegram tokens
 
-# 5. Make scripts executable
+# 6. Make scripts executable
 chmod +x *.sh
 
-# 6. Setup scheduling (choose one)
-./schedule-naukri.sh        # Option A: termux-job-scheduler
-./setup-cron-termux.sh      # Option B: cron
+# 7. Setup scheduling (choose one)
+# Samsung Routines (recommended for Samsung) - see full guide
+./schedule-naukri.sh        # Option B: termux-job-scheduler
+./setup-cron-termux.sh      # Option C: cron
 ```
 
 ## 📱 Android Settings
@@ -38,6 +45,8 @@ chmod +x *.sh
 2. Battery → Don't optimize
 3. Background activity → Allow
 4. Disable Adaptive Battery for Termux
+
+**Install Termux:Boot app from F-Droid** for auto-start functionality
 
 ## ✅ Test Run
 
@@ -55,19 +64,19 @@ Expected: Logs, screenshots, Telegram notification
 tail -f ~/Naukri/logs/naukri-automation.log
 
 # View scheduled jobs
-termux-job-scheduler --list
+termux-job-scheduler '-list'
 
 # View cron jobs
 crontab -l
 
 # Cancel scheduled job
-termux-job-scheduler --cancel --job-id 1001
+termux-job-scheduler '-cancel' '-job-id' 1001
 
 # Stop VNC
 vncserver -kill :*
 
 # Restart VNC
-vncserver -localhost && export DISPLAY=:1
+vncserver -localhost :1 && export DISPLAY=:1
 
 # Manual run
 cd ~/Naukri && ./run-naukri-termux.sh
@@ -77,11 +86,13 @@ cd ~/Naukri && ./run-naukri-termux.sh
 
 | Issue | Solution |
 |-------|----------|
-| Job not running | Check battery settings, keep Termux in recents |
-| Chrome not found | `pkg install chromium` |
+| Job not running | Check battery settings, use Samsung Routines if available |
+| Firefox not found | `pkg install firefox` |
+| geckodriver missing | Reinstall geckodriver from GitHub releases |
 | Out of memory | `export MAVEN_OPTS="-Xmx512m"` |
-| VNC issues | `vncserver -kill :* && vncserver -localhost` |
+| VNC issues | `vncserver -kill :* && vncserver -localhost :1` |
 | OTP prompts | Use WiFi (not mobile data), login manually first |
+| Firefox headless crash | Script uses visible mode with VNC - check VNC is running |
 
 ## 📁 File Locations
 
@@ -93,15 +104,18 @@ cd ~/Naukri && ./run-naukri-termux.sh
 
 ## 🔄 Keep Termux Alive
 
-**Install Termux:Boot from F-Droid**, then:
+**Samsung Routines (Recommended for Samsung):**
+1. Install Termux:Boot from F-Droid
+2. Create startup script: `~/.termux/boot/naukri-automation.sh` (see full guide)
+3. Create Samsung Routine: Time → Open Termux app
 
+**Termux:Boot (For non-Samsung):**
 ```bash
 mkdir -p ~/.termux/boot
 cat > ~/.termux/boot/start-services.sh << 'EOF'
 #!/data/data/com.termux/files/usr/bin/bash
-vncserver -localhost
+vncserver -localhost :1
 export DISPLAY=:1
-crond
 EOF
 chmod +x ~/.termux/boot/start-services.sh
 ```
@@ -112,21 +126,28 @@ chmod +x ~/.termux/boot/start-services.sh
 - Mobile IP changes → OTP issues (use WiFi)
 - Less reliable than PC/laptop setup
 - High resource usage on phone
+- Script timeout: 10 minutes (auto-kills if exceeds)
+- Requires VNC server for Firefox display
 
 ## 💡 Tips
 
 1. Test manually before scheduling
-2. Use old/spare Android device
-3. Keep device plugged in
-4. Use stable WiFi, not mobile data
-5. Check logs weekly
-6. Restart device weekly
+2. Use Samsung Routines if you have a Samsung device (most reliable)
+3. Use old/spare Android device
+4. Keep device plugged in
+5. Use stable WiFi, not mobile data
+6. Check logs weekly
+7. Restart device weekly
+8. Firefox is more stable than Chrome on Android
 
 ## 📖 Full Documentation
 
 See `TERMUX-ANDROID-SETUP.md` for detailed setup guide.
 
 ---
+
+**Browser:** Firefox (more stable than Chrome on Android)
+**Scheduling:** Samsung Routines + Termux:Boot (recommended)
 
 Need help? Check logs first:
 ```bash
