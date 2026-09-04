@@ -42,6 +42,13 @@ public class DriverManager {
     private static WebDriver createChrome() throws IOException {
         logger.info("Setting up ChromeDriver");
         
+        // Set ChromeDriver path explicitly to bypass Selenium Manager
+        String chromeDriverPath = System.getenv("CHROME_DRIVER_PATH");
+        if (chromeDriverPath != null && !chromeDriverPath.isEmpty()) {
+            System.setProperty("webdriver.chrome.driver", chromeDriverPath);
+            logger.info("Set webdriver.chrome.driver to: {}", chromeDriverPath);
+        }
+        
         ChromeOptions options = new ChromeOptions();
         
         // Make browser look more like a real user to avoid bot detection
