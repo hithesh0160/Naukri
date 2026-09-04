@@ -23,14 +23,8 @@ export DISPLAY=:1
 # Set headless mode to true for Android (no visible browser)
 export HEADLESS=true
 
-# Set browser to chrome (chromium in Termux)
-export BROWSER=chrome
-
-# Set ChromeDriver path for Termux
-export CHROME_DRIVER_PATH=$PREFIX/bin/chromedriver
-
-# Disable Selenium Manager using Java system property (more reliable)
-export JAVA_OPTS="-Dwebdriver.chrome.driver=$PREFIX/bin/chromedriver -Dse:manager:disable=true"
+# Set browser to firefox (more stable on Termux than chromium)
+export BROWSER=firefox
 
 # Verify Java is available
 echo "Checking Java installation..."
@@ -53,8 +47,8 @@ fi
 echo ""
 echo "Running tests in headless mode..."
 
-# Run Maven test with system properties to disable Selenium Manager
-mvn clean test -Dwebdriver.chrome.driver=$PREFIX/bin/chromedriver -Dse:manager:disable=true
+# Run Maven test
+mvn clean test
 
 echo ""
 echo "========================================"
