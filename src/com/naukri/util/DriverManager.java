@@ -173,6 +173,13 @@ public class DriverManager {
     private static WebDriver createFirefox() {
         logger.info("Setting up FirefoxDriver");
         
+        // Set geckodriver path explicitly for Termux/Android
+        String geckoDriverPath = System.getenv("GECKO_DRIVER_PATH");
+        if (geckoDriverPath != null && !geckoDriverPath.isEmpty()) {
+            System.setProperty("webdriver.gecko.driver", geckoDriverPath);
+            logger.info("Set webdriver.gecko.driver to: {}", geckoDriverPath);
+        }
+        
         FirefoxOptions options = new FirefoxOptions();
         options.addArguments("--width=1920");
         options.addArguments("--height=1080");

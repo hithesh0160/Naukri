@@ -26,6 +26,9 @@ export HEADLESS=true
 # Set browser to firefox (more stable on Termux than chromium)
 export BROWSER=firefox
 
+# Set geckodriver path for Termux
+export GECKO_DRIVER_PATH=$PREFIX/bin/geckodriver
+
 # Verify Java is available
 echo "Checking Java installation..."
 java -version
