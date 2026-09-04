@@ -22,8 +22,8 @@ export BROWSER=chrome
 # Set ChromeDriver path for Termux
 export CHROME_DRIVER_PATH=$PREFIX/bin/chromedriver
 
-# Disable Selenium Manager (not compatible with Android ARM)
-export SE_DISABLE_MANAGER=true
+# Disable Selenium Manager using Java system property (more reliable)
+export JAVA_OPTS="-Dwebdriver.chrome.driver=$PREFIX/bin/chromedriver -Dse:manager:disable=true"
 
 # Verify Java is available
 echo "Checking Java installation..."
@@ -46,8 +46,8 @@ fi
 echo ""
 echo "Running tests in headless mode..."
 
-# Run Maven test
-mvn clean test
+# Run Maven test with system properties to disable Selenium Manager
+mvn clean test -Dwebdriver.chrome.driver=$PREFIX/bin/chromedriver -Dse:manager:disable=true
 
 echo ""
 echo "========================================"
