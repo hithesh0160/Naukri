@@ -22,6 +22,9 @@ export BROWSER=chrome
 # Set ChromeDriver path for Termux
 export CHROME_DRIVER_PATH=$PREFIX/bin/chromedriver
 
+# Disable Selenium Manager (not compatible with Android ARM)
+export SE_DISABLE_MANAGER=true
+
 # Verify Java is available
 echo "Checking Java installation..."
 java -version

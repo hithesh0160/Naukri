@@ -92,11 +92,25 @@ public class DriverManager {
         
         logger.info("Chrome options configured with anti-detection");
         
-        // In CI environment, explicitly create ChromeDriverService with driver path
+        // Check for explicit ChromeDriver path (for Termux/Android or custom setups)
+        String chromeDriverPath = System.getenv("CHROME_DRIVER_PATH");
         String ciEnv = System.getenv("CI");
         WebDriver driver;
         
-        if ("true".equalsIgnoreCase(ciEnv)) {
+        if (chromeDriverPath != null && !chromeDriverPath.isEmpty()) {
+            File driverFile = new File(chromeDriverPath);
+            if (driverFile.exists()) {
+                logger.info("Using ChromeDriver at: {}", driverFile.getAbsolutePath());
+                ChromeDriverService service = new ChromeDriverService.Builder()
+                    .usingDriverExecutable(driverFile)
+                    .usingAnyFreePort()
+                    .build();
+                driver = new ChromeDriver(service, options);
+            } else {
+                logger.warn("ChromeDriver not found at {}, using default", chromeDriverPath);
+                driver = new ChromeDriver(options);
+            }
+        } else if ("true".equalsIgnoreCase(ciEnv)) {
             File driverFile = new File("/usr/local/bin/chromedriver");
             if (driverFile.exists()) {
                 logger.info("Using ChromeDriver at: {}", driverFile.getAbsolutePath());
