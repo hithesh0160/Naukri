@@ -42,6 +42,9 @@ public class DriverManager {
     private static WebDriver createChrome() throws IOException {
         logger.info("Setting up ChromeDriver");
         
+        // Disable Selenium Manager explicitly
+        System.setProperty("se:manager:disable", "true");
+        
         // Set ChromeDriver path explicitly to bypass Selenium Manager
         String chromeDriverPath = System.getenv("CHROME_DRIVER_PATH");
         if (chromeDriverPath != null && !chromeDriverPath.isEmpty()) {
@@ -100,7 +103,6 @@ public class DriverManager {
         logger.info("Chrome options configured with anti-detection");
         
         // Check for explicit ChromeDriver path (for Termux/Android or custom setups)
-        String chromeDriverPath = System.getenv("CHROME_DRIVER_PATH");
         String ciEnv = System.getenv("CI");
         WebDriver driver;
         
