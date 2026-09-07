@@ -1,0 +1,5 @@
+64% → NO_TRADE (expected: NO_TRADE)
+65% → TRADE (expected: TRADE)
+70% → TRADE (expected: TRADE)
+50% → NO_TRADE (expected: NO_TRADE)
+80% → TRADE (expected: TRADE)
