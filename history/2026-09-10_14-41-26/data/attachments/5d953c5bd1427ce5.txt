@@ -1,0 +1,4 @@
+69% → Low confidence (expected: Low)
+70% → High confidence (expected: High)
+75% → High confidence (expected: High)
+50% → Low confidence (expected: Low)
